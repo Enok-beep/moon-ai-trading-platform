@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Connection Test</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #0f0f1a;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #1a1a2e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1, h2 {
+      color: #6c5ce7;
+    }
+    
+    button {
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #a29bfe;
+    }
+    
+    .console {
+      background-color: #16213e;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    
+    .success {
+      color: #00b894;
+    }
+    
+    .error {
+      color: #ff7675;
+    }
+    
+    .warning {
+      color: #fdcb6e;
+    }
+    
+    .info {
+      color: #74b9ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Supabase Connection Test</h1>
+    <p>This tool tests the connection to your Supabase database and checks the database schema.</p>
+    
+    <div>
+      <button id="run-test-btn">Run Connection Test</button>
+      <button id="clear-console-btn">Clear Console</button>
+    </div>
+    
+    <div class="console" id="console-output"></div>
+  </div>
+
+  <script type="module">
+    // Import the test script
+    import * as testScript from './test-supabase-connection.js';
+    
+    // DOM elements
+    const runTestBtn = document.getElementById('run-test-btn');
+    const clearConsoleBtn = document.getElementById('clear-console-btn');
+    const consoleOutput = document.getElementById('console-output');
+    
+    // Override console methods to capture output
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+      info: console.info
+    };
+    
+    function appendToConsole(message, type = 'log') {
+      const line = document.createElement('div');
+      line.className = type;
+      
+      // Convert objects to formatted strings
+      if (typeof message === 'object') {
+        try {
+          message = JSON.stringify(message, null, 2);
+        } catch (e) {
+          message = String(message);
+        }
+      }
+      
+      line.textContent = message;
+      consoleOutput.appendChild(line);
+      
+      // Auto-scroll to bottom
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+    
+    // Override console methods
+    console.log = function(...args) {
+      args.forEach(arg => appendToConsole(arg, 'log'));
+      originalConsole.log(...args);
+    };
+    
+    console.error = function(...args) {
+      args.forEach(arg => appendToConsole(arg, 'error'));
+      originalConsole.error(...args);
+    };
+    
+    console.warn = function(...args) {
+      args.forEach(arg => appendToConsole(arg, 'warning'));
+      originalConsole.warn(...args);
+    };
+    
+    console.info = function(...args) {
+      args.forEach(arg => appendToConsole(arg, 'info'));
+      originalConsole.info(...args);
+    };
+    
+    // Run test button
+    runTestBtn.addEventListener('click', async () => {
+      consoleOutput.innerHTML = '';
+      appendToConsole('Starting Supabase connection test...', 'info');
+      
+      try {
+        // Call the runAllTests function from the imported script
+        await testScript.runAllTests();
+      } catch (err) {
+        console.error('Error running tests:', err);
+      }
+    });
+    
+    // Clear console button
+    clearConsoleBtn.addEventListener('click', () => {
+      consoleOutput.innerHTML = '';
+    });
+    
+    // Initial message
+    appendToConsole('Click "Run Connection Test" to start testing your Supabase connection.', 'info');
+  </script>
+</body>
+</html>

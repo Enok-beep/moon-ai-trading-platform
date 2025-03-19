@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Integration Demo</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #0f0f1a;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #1a1a2e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1, h2, h3 {
+      color: #6c5ce7;
+    }
+    
+    button {
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #a29bfe;
+    }
+    
+    .result-container {
+      background-color: #16213e;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    
+    .auth-container {
+      display: flex;
+      flex-direction: column;
+      max-width: 300px;
+      margin-bottom: 20px;
+    }
+    
+    input {
+      padding: 8px;
+      margin-bottom: 10px;
+      background-color: #2d3748;
+      border: 1px solid #4a5568;
+      border-radius: 4px;
+      color: #e0e0e0;
+    }
+    
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    
+    .success {
+      background-color: rgba(0, 184, 148, 0.2);
+      border: 1px solid #00b894;
+    }
+    
+    .error {
+      background-color: rgba(255, 118, 117, 0.2);
+      border: 1px solid #ff7675;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Supabase Integration Demo</h1>
+    <p>This demo shows how to connect to Supabase and fetch data using the supabase-integration.js module.</p>
+    
+    <h2>Authentication</h2>
+    <div class="auth-container">
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <div>
+        <button id="signup-btn">Sign Up</button>
+        <button id="login-btn">Log In</button>
+        <button id="logout-btn">Log Out</button>
+      </div>
+      <div id="auth-status" class="status"></div>
+    </div>
+    
+    <h2>Data Operations</h2>
+    <div>
+      <button id="check-connection-btn">Check Connection</button>
+      <button id="get-market-data-btn">Get Market Data</button>
+      <button id="get-sentiment-btn">Get Sentiment</button>
+      <button id="get-news-btn">Get News</button>
+      <button id="get-prediction-btn">Get Prediction</button>
+    </div>
+    
+    <div class="result-container">
+      <pre id="result">Results will appear here...</pre>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import functions from supabase-integration.js
+    import {
+      supabaseClient,
+      signUp,
+      signIn,
+      signOut,
+      onAuthStateChange,
+      getMarketData,
+      convertCandlestickData,
+      getSocialSentiment,
+      getNews,
+      getPrediction,
+      checkConnection
+    } from './supabase-integration.js';
+    
+    // DOM elements
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const signupBtn = document.getElementById('signup-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const authStatus = document.getElementById('auth-status');
+    const checkConnectionBtn = document.getElementById('check-connection-btn');
+    const getMarketDataBtn = document.getElementById('get-market-data-btn');
+    const getSentimentBtn = document.getElementById('get-sentiment-btn');
+    const getNewsBtn = document.getElementById('get-news-btn');
+    const getPredictionBtn = document.getElementById('get-prediction-btn');
+    const resultDisplay = document.getElementById('result');
+    
+    // Helper to display results
+    function displayResult(data, error = null) {
+      if (error) {
+        resultDisplay.textContent = `Error: ${JSON.stringify(error, null, 2)}`;
+        return;
+      }
+      resultDisplay.textContent = JSON.stringify(data, null, 2);
+    }
+    
+    // Helper to update auth status
+    function updateAuthStatus(message, isError = false) {
+      authStatus.textContent = message;
+      authStatus.className = 'status ' + (isError ? 'error' : 'success');
+    }
+    
+    // Set up auth state change listener
+    onAuthStateChange((event, session) => {
+      if (session) {
+        updateAuthStatus(`Logged in as: ${session.user.email}`);
+      } else {
+        updateAuthStatus('Not logged in');
+      }
+    });
+    
+    // Sign up button
+    signupBtn.addEventListener('click', async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        updateAuthStatus('Email and password are required', true);
+        return;
+      }
+      
+      const { data, error } = await signUp(email, password);
+      
+      if (error) {
+        updateAuthStatus(`Sign up error: ${error.message}`, true);
+        return;
+      }
+      
+      updateAuthStatus('Sign up successful! Check your email for confirmation.');
+      displayResult(data);
+    });
+    
+    // Login button
+    loginBtn.addEventListener('click', async () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        updateAuthStatus('Email and password are required', true);
+        return;
+      }
+      
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        updateAuthStatus(`Login error: ${error.message}`, true);
+        return;
+      }
+      
+      updateAuthStatus('Login successful!');
+      displayResult(data);
+    });
+    
+    // Logout button
+    logoutBtn.addEventListener('click', async () => {
+      const { error } = await signOut();
+      
+      if (error) {
+        updateAuthStatus(`Logout error: ${error.message}`, true);
+        return;
+      }
+      
+      updateAuthStatus('Logged out successfully');
+      displayResult({ message: 'Logged out successfully' });
+    });
+    
+    // Check connection button
+    checkConnectionBtn.addEventListener('click', async () => {
+      resultDisplay.textContent = 'Checking connection...';
+      
+      const isConnected = await checkConnection();
+      
+      if (isConnected) {
+        displayResult({ status: 'Connected to Supabase successfully' });
+      } else {
+        displayResult(null, { message: 'Failed to connect to Supabase' });
+      }
+    });
+    
+    // Get market data button
+    getMarketDataBtn.addEventListener('click', async () => {
+      resultDisplay.textContent = 'Fetching market data...';
+      
+      const symbol = 'AAPL'; // Example symbol
+      const timeframe = '1d'; // Example timeframe
+      
+      const { data, error } = await getMarketData(symbol, timeframe);
+      
+      if (error) {
+        displayResult(null, error);
+        return;
+      }
+      
+      // Convert data for chart
+      const chartData = convertCandlestickData(data);
+      displayResult(chartData.slice(0, 3)); // Show just the first 3 items to keep it readable
+    });
+    
+    // Get sentiment button
+    getSentimentBtn.addEventListener('click', async () => {
+      resultDisplay.textContent = 'Fetching sentiment data...';
+      
+      const symbol = 'AAPL'; // Example symbol
+      
+      const { data, error } = await getSocialSentiment(symbol);
+      
+      if (error) {
+        displayResult(null, error);
+        return;
+      }
+      
+      displayResult(data);
+    });
+    
+    // Get news button
+    getNewsBtn.addEventListener('click', async () => {
+      resultDisplay.textContent = 'Fetching news...';
+      
+      const symbol = 'AAPL'; // Example symbol
+      
+      const { data, error } = await getNews(symbol, 3); // Limit to 3 news items
+      
+      if (error) {
+        displayResult(null, error);
+        return;
+      }
+      
+      displayResult(data);
+    });
+    
+    // Get prediction button
+    getPredictionBtn.addEventListener('click', async () => {
+      resultDisplay.textContent = 'Fetching prediction...';
+      
+      const symbol = 'AAPL'; // Example symbol
+      
+      const { data, error } = await getPrediction(symbol);
+      
+      if (error) {
+        displayResult(null, error);
+        return;
+      }
+      
+      displayResult(data);
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check if user is already logged in
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        updateAuthStatus(`Logged in as: ${session.user.email}`);
+      } else {
+        updateAuthStatus('Not logged in');
+      }
+    });
+  </script>
+</body>
+</html>

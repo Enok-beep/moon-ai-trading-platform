@@ -1,0 +1,12 @@
+{
+  "name": "supabase-integration",
+  "version": "1.0.0",
+  "description": "Supabase integration for Moon AI Trading Platform",
+  "main": "serve-files.js",
+  "type": "module",
+  "scripts": {
+    "start": "node serve-files.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

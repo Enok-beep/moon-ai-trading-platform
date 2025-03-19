@@ -1,0 +1,3875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>Moon AI Trading Platform | Advanced Market Analysis</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Basic Styles -->
+  <style>
+    :root {
+      --primary-color: #6c5ce7;
+      --primary-light: #a29bfe;
+      --secondary-color: #00cec9;
+      --accent-color: #fd79a8;
+      --background-color: #0f0f1a;
+      --card-background: #1a1a2e;
+      --panel-background: #16213e;
+      --text-color: #e0e0e0;
+      --text-secondary: #a0a0a0;
+      --border-color: #2d3748;
+      --header-height: 60px;
+      --sidebar-width: 260px;
+      --right-panel-width: 320px;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #ff7675;
+      --chart-bull: #00b894;
+      --chart-bear: #ff7675;
+      --grid-color: rgba(255, 255, 255, 0.07);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Header */
+    .platform-header {
+      height: var(--header-height);
+      background-color: var(--card-background);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-icon {
+      margin-right: 10px;
+      font-size: 28px;
+      color: var(--primary-color);
+    }
+
+    .logo span {
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 800;
+    }
+
+    .search-bar {
+      width: 300px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: rgba(40, 40, 80, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+    }
+
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .platform-button {
+      padding: 8px 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .platform-button:hover {
+      background-color: var(--primary-light);
+    }
+
+    .platform-button.secondary {
+      background-color: transparent;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-light);
+    }
+
+    .platform-button.secondary:hover {
+      background-color: rgba(108, 92, 231, 0.1);
+    }
+
+    .user-profile {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .platform-container {
+      display: flex;
+      height: calc(100vh - var(--header-height));
+      margin-top: var(--header-height);
+    }
+
+    /* Left Sidebar (Watchlist) */
+    .left-sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--card-background);
+      border-right: 1px solid var(--border-color);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .left-sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-toggle {
+      position: absolute;
+      top: calc(var(--header-height) + 10px);
+      left: calc(var(--sidebar-width) + 10px);
+      z-index: 10;
+      width: 24px;
+      height: 24px;
+      background-color: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: left 0.3s ease;
+    }
+
+    .sidebar-toggle.collapsed {
+      left: 10px;
+    }
+
+    /* Auth Modal */
+    .auth-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(15, 15, 26, 0.9);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .auth-modal.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .auth-container {
+      background-color: var(--card-background);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    .auth-modal.visible .auth-container {
+      transform: translateY(0);
+    }
+    .auth-header {
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    .auth-header h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    .auth-tab.active {
+      color: var(--primary-light);
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .form-group label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background-color: rgba(40,40,80,0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .auth-button {
+      padding: 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s ease;
+    }
+    .auth-button:hover {
+      background-color: var(--primary-light);
+    }
+    .auth-message {
+      text-align: center;
+      color: var(--danger);
+      font-size: 14px;
+      min-height: 20px;
+      margin-top: 10px;
+    }
+
+    /* Stock Item (for watchlist) */
+    .stock-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stock-item:hover {
+      background-color: rgba(108, 92, 231, 0.1);
+    }
+    .stock-item.active {
+      background-color: rgba(108, 92, 231, 0.15);
+      border-left: 3px solid var(--primary-color);
+    }
+    .stock-symbol {
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .stock-company {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .stock-price {
+      font-weight: 600;
+    }
+    .stock-change {
+      font-size: 12px;
+    }
+    .stock-change.positive {
+      color: var(--success);
+    }
+    .stock-change.negative {
+      color: var(--danger);
+    }
+
+    /* Right Panels (AI, Sentiment, News, etc.) */
+    .right-panels {
+      width: var(--right-panel-width);
+      background-color: var(--card-background);
+      border-left: 1px solid var(--border-color);
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    .right-panels.collapsed {
+      transform: translateX(100%);
+    }
+    .panels-toggle {
+      position: absolute;
+      top: calc(var(--header-height) + 10px);
+      right: calc(var(--right-panel-width) + 10px);
+      z-index: 10;
+      width: 24px;
+      height: 24px;
+      background-color: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: right 0.3s ease;
+    }
+    .panels-toggle.collapsed {
+      right: 10px;
+    }
+    .panel {
+      margin: 15px;
+      background-color: var(--panel-background);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .panel h3 {
+      margin-bottom: 0;
+      color: var(--primary-light);
+    }
+    .panel-content {
+      font-size: 14px;
+      color: var(--text-secondary);
+      min-height: 80px;
+    }
+    .panel-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .panel-loading .mini-loader {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(108,92,231,0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    /* Chart Toolbar */
+    .chart-toolbar {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 20;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toolbar-group {
+      display: flex;
+      gap: 5px;
+      background-color: rgba(26, 26, 46, 0.8);
+      padding: 5px;
+      border-radius: 6px;
+      backdrop-filter: blur(5px);
+    }
+    .toolbar-separator {
+      width: 1px;
+      background-color: var(--border-color);
+      margin: 0 5px;
+    }
+    .control-button {
+      background-color: rgba(108,92,231,0.2);
+      color: var(--primary-light);
+      border: 1px solid rgba(108,92,231,0.3);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .control-button:hover {
+      background-color: rgba(108,92,231,0.3);
+    }
+    .control-button.active {
+      background-color: rgba(108,92,231,0.4);
+      border-color: var(--primary-color);
+    }
+
+    /* Timeframe Controls */
+    .timeframe-controls {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 5px;
+      background-color: rgba(26, 26, 46, 0.8);
+      padding: 5px 10px;
+      border-radius: 6px;
+      backdrop-filter: blur(5px);
+    }
+    .timeframe-button {
+      padding: 5px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .timeframe-button:hover {
+      background-color: rgba(108,92,231,0.2);
+    }
+    .timeframe-button.active {
+      background-color: rgba(108,92,231,0.3);
+      color: var(--primary-light);
+    }
+
+    /* Loading States */
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(15,15,26,0.8);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.3s ease-out;
+    }
+    .loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loader-container {
+      text-align: center;
+      max-width: 80%;
+    }
+    .loader {
+      width: 60px; height: 60px;
+      border: 4px solid rgba(108,92,231,0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .loading-message {
+      color: var(--text-color);
+      font-size: 18px;
+      margin-bottom: 25px;
+    }
+    .loading-progress {
+      width: 100%;
+      max-width: 300px;
+      height: 4px;
+      background-color: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .loading-progress-bar {
+      height: 100%;
+      width: 10%;
+      background-color: var(--primary-color);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+    .loading-tasks {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 15px;
+      text-align: left;
+      max-width: 300px;
+      margin: 15px auto 0;
+    }
+    .loading-task {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .loading-task-status {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+    .loading-task-pending {
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(108,92,231,0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+    }
+    .loading-task-complete {
+      color: var(--success);
+      font-size: 16px;
+    }
+    
+    /* Skeleton Loaders for Panels */
+    .skeleton {
+      background: linear-gradient(90deg, var(--panel-background) 0%, rgba(42, 46, 73, 0.5) 50%, var(--panel-background) 100%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 4px;
+      height: 12px;
+      margin-bottom: 8px;
+    }
+    .skeleton-heading {
+      width: 70%;
+      height: 16px;
+    }
+    .skeleton-text {
+      width: 100%;
+    }
+    .skeleton-text-short {
+      width: 50%;
+    }
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Chart Container */
+    .chart-wrapper {
+      background-color: var(--card-background);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 100%;
+      position: relative;
+    }
+    .chart-loading {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(26, 26, 46, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      z-index: 5;
+    }
+    .chart-loading.loaded {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      background-color: rgba(26, 26, 46, 0.9);
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      max-width: 240px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .tooltip.visible {
+      opacity: 1;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 320px;
+    }
+    .toast {
+      background-color: rgba(26, 26, 46, 0.9);
+      border-left: 4px solid var(--primary-color);
+      padding: 12px 15px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: toast-in 0.3s ease forwards;
+      max-width: 100%;
+    }
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+    .toast.success {
+      border-left-color: var(--success);
+    }
+    .toast.warning {
+      border-left-color: var(--warning);
+    }
+    .toast-icon {
+      margin-right: 10px;
+      font-size: 18px;
+      color: var(--primary-color);
+    }
+    .toast.error .toast-icon {
+      color: var(--danger);
+    }
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+    .toast.warning .toast-icon {
+      color: var(--warning);
+    }
+    .toast-content {
+      flex: 1;
+    }
+    .toast-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .toast-message {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .toast-close {
+      cursor: pointer;
+      padding: 3px;
+      margin-left: 10px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .toast-close:hover {
+      opacity: 1;
+    }
+    @keyframes toast-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast.removing {
+      animation: toast-out 0.3s ease forwards;
+    }
+    @keyframes toast-out {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .left-sidebar {
+        position: absolute;
+        z-index: 90;
+        height: calc(100vh - var(--header-height));
+      }
+      .right-panels {
+        position: absolute;
+        right: 0;
+        z-index: 90;
+        height: calc(100vh - var(--header-height));
+      }
+    }
+    @media (max-width: 768px) {
+      .search-bar {
+        display: none;
+      }
+      .user-controls {
+        margin-left: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Modal -->
+  <div class="auth-modal" id="auth-modal">
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="logo" style="justify-content: center;">
+          <div class="logo-icon">⬢</div>
+          Moon<span>AI</span> Trading
+        </div>
+        <p>Access your AI-powered trading dashboard</p>
+      </div>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Log In</div>
+        <div class="auth-tab" data-tab="signup">Sign Up</div>
+      </div>
+
+      <div class="auth-form-container">
+        <form class="auth-form" id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" placeholder="you@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Your password" required />
+          </div>
+          <button type="submit" class="auth-button">Log In</button>
+          <div class="auth-message" id="login-message"></div>
+        </form>
+
+        <form class="auth-form" id="signup-form" style="display: none;">
+          <div class="form-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" placeholder="you@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" placeholder="Choose a strong password" required />
+          </div>
+          <button type="submit" class="auth-button">Create Account</button>
+          <div class="auth-message" id="signup-message"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <header class="platform-header">
+    <div class="logo">
+      <div class="logo-icon">⬢</div>
+      Moon<span>AI</span> Trading
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Search for assets, indicators or patterns..." />
+    </div>
+    <div class="user-controls">
+      <button id="login-button" class="platform-button">Log In</button>
+      <button id="watchlist-button" class="platform-button secondary">Watchlists</button>
+      <div class="user-profile" id="user-profile" style="display: none;">
+        <div class="user-avatar">A</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="platform-container">
+    <!-- Left Sidebar (Watchlist) -->
+    <aside class="left-sidebar" id="left-sidebar">
+      <div id="watchlist-container">
+        <!-- Watchlist items will be populated here -->
+        <div class="stock-item">
+          <div class="stock-info">
+            <div class="stock-symbol">AAPL</div>
+            <div class="stock-company">Apple Inc.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$173.45</div>
+            <div class="stock-change positive">+1.2%</div>
+          </div>
+        </div>
+        <div class="stock-item active">
+          <div class="stock-info">
+            <div class="stock-symbol">MSFT</div>
+            <div class="stock-company">Microsoft Corp.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$312.79</div>
+            <div class="stock-change positive">+0.8%</div>
+          </div>
+        </div>
+        <div class="stock-item">
+          <div class="stock-info">
+            <div class="stock-symbol">TSLA</div>
+            <div class="stock-company">Tesla, Inc.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$194.05</div>
+            <div class="stock-change negative">-1.3%</div>
+          </div>
+        </div>
+        <div class="stock-item">
+          <div class="stock-info">
+            <div class="stock-symbol">NVDA</div>
+            <div class="stock-company">NVIDIA Corp.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$435.20</div>
+            <div class="stock-change positive">+2.7%</div>
+          </div>
+        </div>
+        <div class="stock-item">
+          <div class="stock-info">
+            <div class="stock-symbol">AMZN</div>
+            <div class="stock-company">Amazon.com Inc.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$128.91</div>
+            <div class="stock-change negative">-0.4%</div>
+          </div>
+        </div>
+        <div class="stock-item">
+          <div class="stock-info">
+            <div class="stock-symbol">GOOGL</div>
+            <div class="stock-company">Alphabet Inc.</div>
+          </div>
+          <div class="stock-price-info">
+            <div class="stock-price">$142.10</div>
+            <div class="stock-change positive">+0.5%</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="sidebar-toggle" id="sidebar-toggle">
+      <span>◀</span>
+    </div>
+
+    <!-- Main Chart Area -->
+    <main style="flex:1; position: relative;">
+      <!-- Chart Toolbar: Advanced Controls -->
+      <div class="chart-toolbar">
+        <div class="toolbar-group">
+          <button class="control-button" id="time-warp-btn" data-tooltip="Visualize historical trends and future scenarios">Time-Warp</button>
+          <button class="control-button" id="vr-mode-btn" data-tooltip="Experience 3D chart in VR mode">VR Mode</button>
+          <button class="control-button" id="lens-btn" data-tooltip="Toggle gravitational lens effect">Grav. Lens</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="control-button" id="indicator-btn" data-tooltip="Add technical indicators">Indicators</button>
+          <button class="control-button" id="comparison-btn" data-tooltip="Compare with other assets">Compare</button>
+        </div>
+      </div>
+
+      <div class="chart-wrapper">
+        <!-- Loading overlay for the chart specifically -->
+        <div class="chart-loading" id="chart-loading">
+          <div class="loader"></div>
+          <div style="margin-top: 15px; color: var(--text-color);">
+            Loading market data...
+          </div>
+        </div>
+        
+        <!-- Main chart container -->
+        <div id="chart-container" style="width: 100%; height: 100%;"></div>
+      </div>
+
+      <!-- Timeframe Controls -->
+      <div class="timeframe-controls">
+        <div class="timeframe-button" data-timeframe="1d">1D</div>
+        <div class="timeframe-button active" data-timeframe="1w">1W</div>
+        <div class="timeframe-button" data-timeframe="1m">1M</div>
+        <div class="timeframe-button" data-timeframe="3m">3M</div>
+        <div class="timeframe-button" data-timeframe="1y">1Y</div>
+        <div class="timeframe-button" data-timeframe="all">ALL</div>
+      </div>
+    </main>
+
+    <!-- Right Panels: AI, Sentiment, News, etc. -->
+    <aside class="right-panels" id="right-panels">
+      <!-- AI Predictions Panel -->
+      <div class="panel" id="ai-panel">
+        <div class="panel-header">
+          <h3>AI Predictions</h3>
+          <div id="ai-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+        </div>
+        <div class="panel-content" id="ai-content">
+          <!-- Skeleton loader -->
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        </div>
+      </div>
+
+      <!-- Social Sentiment Panel -->
+      <div class="panel" id="sentiment-panel">
+        <div class="panel-header">
+          <h3>Social Sentiment</h3>
+          <div id="sentiment-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+        </div>
+        <div class="panel-content" id="sentiment-content">
+          <!-- Skeleton loader -->
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        </div>
+      </div>
+
+      <!-- Market News Panel -->
+      <div class="panel" id="news-panel">
+        <div class="panel-header">
+          <h3>Market News</h3>
+          <div id="news-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+        </div>
+        <div class="panel-content" id="news-content">
+          <!-- Skeleton loader -->
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+          <div style="margin-top: 15px;"></div>
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        </div>
+      </div>
+    </aside>
+    <div class="panels-toggle" id="panels-toggle">
+      <span>▶</span>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loader-container">
+      <div class="loader"></div>
+      <div class="loading-message">Loading Moon AI Trading Platform</div>
+      <div class="loading-progress">
+        <div class="loading-progress-bar" id="loading-progress-bar"></div>
+      </div>
+      <div class="loading-tasks">
+        <div class="loading-task">
+          <div class="loading-task-status">
+            <div class="loading-task-pending" id="task-initialize"></div>
+          </div>
+          <div>Initializing platform components</div>
+        </div>
+        <div class="loading-task">
+          <div class="loading-task-status">
+            <div class="loading-task-pending" id="task-connect"></div>
+          </div>
+          <div>Connecting to market data</div>
+        </div>
+        <div class="loading-task">
+          <div class="loading-task-status">
+            <div class="loading-task-pending" id="task-ai"></div>
+          </div>
+          <div>Loading AI prediction models</div>
+        </div>
+        <div class="loading-task">
+          <div class="loading-task-status">
+            <div class="loading-task-pending" id="task-chart"></div>
+          </div>
+          <div>Preparing 3D visualization</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice Assistant -->
+  <div class="voice-assistant" id="voice-assistant">
+    <div class="voice-assistant-icon" id="voice-assistant-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" x2="12" y1="19" y2="22"></line>
+      </svg>
+    </div>
+    <div class="voice-assistant-panel" id="voice-assistant-panel">
+      <div class="voice-panel-header">
+        <div>Moon AI Assistant</div>
+        <div class="voice-panel-close" id="voice-panel-close">✕</div>
+      </div>
+      <div class="voice-panel-body" id="voice-panel-content">
+        <div class="assistant-message">How can I help with your trading today?</div>
+      </div>
+      <div class="voice-panel-footer">
+        <input type="text" id="voice-input" placeholder="Ask something or press mic..." />
+        <button id="voice-mic-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" x2="12" y1="19" y2="22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Indicator Modal -->
+  <div class="custom-indicator-modal" id="custom-indicator-modal">
+    <div class="custom-indicator-container">
+      <div class="modal-header">
+        <h3>Custom Indicator Editor</h3>
+        <div class="modal-close" id="indicator-modal-close">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="indicator-name" placeholder="Indicator name" />
+        </div>
+        <div class="form-group">
+          <label>Script</label>
+          <textarea id="indicator-script" rows="8" placeholder="// Example:
+function myIndicator(data) {
+  // Calculate values
+  const result = data.map(candle => ({
+    price: candle.close,
+    signal: candle.close > candle.open ? 'buy' : 'sell'
+  }));
+  return result;
+}"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Settings</label>
+          <div class="indicator-settings">
+            <div class="setting">
+              <label>Color</label>
+              <input type="color" id="indicator-color" value="#6c5ce7" />
+            </div>
+            <div class="setting">
+              <label>Line Width</label>
+              <input type="range" id="indicator-width" min="1" max="5" value="2" />
+            </div>
+            <div class="setting">
+              <label>Style</label>
+              <select id="indicator-style">
+                <option>Solid</option>
+                <option>Dashed</option>
+                <option>Dotted</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="platform-button secondary" id="indicator-cancel">Cancel</button>
+        <button class="platform-button" id="indicator-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+  
+  <style>
+    /* Voice Assistant Styling */
+    .voice-assistant {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 900;
+    }
+    
+    .voice-assistant-icon {
+      width: 50px;
+      height: 50px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .voice-assistant-icon:hover {
+      transform: scale(1.1);
+    }
+    
+    .voice-assistant-panel {
+      position: absolute;
+      bottom: 60px;
+      right: 0;
+      width: 300px;
+      background-color: var(--card-background);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+    }
+    
+    .voice-assistant-panel.active {
+      display: flex;
+    }
+    
+    .voice-panel-header {
+      padding: 15px;
+      background-color: var(--panel-background);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .voice-panel-close {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .voice-panel-close:hover {
+      opacity: 1;
+    }
+    
+    .voice-panel-body {
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .assistant-message {
+      background-color: var(--panel-background);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border-top-left-radius: 0;
+      align-self: flex-start;
+      max-width: 80%;
+    }
+    
+    .user-message {
+      background-color: var(--primary-color);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border-top-right-radius: 0;
+      align-self: flex-end;
+      max-width: 80%;
+    }
+    
+    .voice-panel-footer {
+      padding: 10px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+    
+    .voice-panel-footer input {
+      flex: 1;
+      padding: 8px 12px;
+      background-color: rgba(40, 40, 80, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-color);
+    }
+    
+    .voice-panel-footer button {
+      width: 36px;
+      height: 36px;
+      background-color: var(--primary-color);
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+    }
+    
+    /* Custom Indicator Modal */
+    .custom-indicator-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(15, 15, 26, 0.9);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .custom-indicator-modal.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .custom-indicator-container {
+      background-color: var(--card-background);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    
+    .custom-indicator-modal.visible .custom-indicator-container {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-close {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .modal-close:hover {
+      opacity: 1;
+    }
+    
+    .modal-body {
+      padding: 15px;
+    }
+    
+    .indicator-settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .setting {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .setting label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+    }
+    
+    .setting input, .setting select {
+      width: 100%;
+      background-color: rgba(40, 40, 80, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-color);
+      padding: 8px;
+    }
+    
+    .modal-footer {
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+  </style>
+
+  <!-- Import Three.js and its extensions from CDN -->
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/shaders/CopyShader.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  
+  <!-- Fragment shader for gravitational lensing effect -->
+  <script id="gravitationalLensShader" type="x-shader/x-fragment">
+    uniform sampler2D tDiffuse;
+    uniform vec2 center;
+    uniform float strength;
+    uniform vec2 resolution;
+    
+    varying vec2 vUv;
+    
+    void main() {
+      vec2 uv = vUv;
+      vec2 centerCoord = center / resolution;
+      vec2 delta = uv - centerCoord;
+      float distance = length(delta);
+      
+      // Gravitational lensing - warps space more near the center
+      float ratio = 1.0 + strength / (distance * 50.0 + 0.1);
+      
+      // Adjust UV based on gravitational pull
+      vec2 directionToCenter = normalize(delta);
+      vec2 newUv = centerCoord + delta * ratio;
+      
+      // Ensure we stay within bounds
+      newUv = clamp(newUv, 0.0, 1.0);
+      
+      // Sample the texture with our modified UVs
+      vec4 color = texture2D(tDiffuse, newUv);
+      
+      // Add slight color shift based on distance (like chromatic aberration)
+      float blueShift = min(strength / (distance * 20.0), 0.2);
+      color.b = mix(color.b, 1.0, blueShift);
+      
+      gl_FragColor = color;
+    }
+  </script>
+  
+  <!-- Vertex shader for particle system -->
+  <script id="particleVertexShader" type="x-shader/x-vertex">
+    uniform float time;
+    uniform float size;
+    uniform float speed;
+    uniform vec3 flowDirection;
+    
+    attribute float age;
+    attribute vec3 velocity;
+    
+    varying vec3 vColor;
+    varying float vAlpha;
+    
+    void main() {
+      // Basic particle aging
+      float aliveTime = mod(time * speed + age, 1.0);
+      
+      // Color based on age and initial velocity
+      vColor = mix(vec3(0.6, 0.5, 1.0), vec3(0.1, 0.2, 0.9), aliveTime);
+      
+      // Alpha that fades out at the end of life
+      vAlpha = sin(aliveTime * 3.14159);
+      
+      // Calculate position with flowDirection influence
+      vec3 newPosition = position + (velocity + flowDirection * 0.5) * aliveTime * 5.0;
+      
+      // Size that changes with life
+      float particleSize = size * (1.0 - aliveTime * 0.5);
+      
+      // Final position
+      vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
+      gl_PointSize = particleSize * (300.0 / -mvPosition.z);
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  </script>
+  
+  <!-- Fragment shader for particles -->
+  <script id="particleFragmentShader" type="x-shader/x-fragment">
+    varying vec3 vColor;
+    varying float vAlpha;
+    
+    void main() {
+      // Calculate distance from center of point (for circular particles)
+      vec2 xy = gl_PointCoord.xy - vec2(0.5);
+      float radius = length(xy);
+      
+      // Soft circle shape with smooth edges
+      float alpha = smoothstep(0.5, 0.4, radius) * vAlpha;
+      
+      // Final color with glow effect
+      gl_FragColor = vec4(vColor, alpha);
+    }
+  </script>
+
+  <script type="module">
+    // Load Web Speech API if available
+    let speechRecognition;
+    let speechSynthesis;
+    
+    try {
+      // Initialize speech recognition if available
+      if ('webkitSpeechRecognition' in window) {
+        speechRecognition = new webkitSpeechRecognition();
+        speechRecognition.continuous = false;
+        speechRecognition.interimResults = false;
+        speechRecognition.lang = 'en-US';
+      } else if ('SpeechRecognition' in window) {
+        speechRecognition = new SpeechRecognition();
+        speechRecognition.continuous = false;
+        speechRecognition.interimResults = false;
+        speechRecognition.lang = 'en-US';
+      }
+      
+      // Initialize speech synthesis
+      if ('speechSynthesis' in window) {
+        speechSynthesis = window.speechSynthesis;
+      }
+    } catch (e) {
+      console.error('Error initializing speech APIs:', e);
+    }
+  
+    // Attempt to import supabase-integration.js
+    let supabaseClient,
+        signUp,
+        signIn,
+        signOut,
+        onAuthStateChange,
+        getMarketData,
+        convertCandlestickData,
+        subscribeToMarketData,
+        getWatchlists,
+        getSocialSentiment,
+        getNews,
+        getPrediction;
+    
+    // Progress tracking for loading indicators
+    let loadingProgress = {
+      initialized: false,
+      connected: false,
+      aiLoaded: false,
+      chartPrepared: false,
+      totalProgress: 0
+    };
+
+    // Toast notification system
+    const toastContainer = document.getElementById('toast-container');
+    
+    function showToast(type, title, message, duration = 5000) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let iconSymbol = '●';
+      if (type === 'success') iconSymbol = '✓';
+      else if (type === 'error') iconSymbol = '✕';
+      else if (type === 'warning') iconSymbol = '⚠';
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${iconSymbol}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-message">${message}</div>
+        </div>
+        <div class="toast-close">✕</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Add event listener to close button
+      toast.querySelector('.toast-close').addEventListener('click', () => {
+        removeToast(toast);
+      });
+      
+      // Auto-remove after duration
+      setTimeout(() => {
+        removeToast(toast);
+      }, duration);
+      
+      return toast;
+    }
+    
+    function removeToast(toast) {
+      if (toast.classList.contains('removing')) return;
+      
+      toast.classList.add('removing');
+      toast.addEventListener('animationend', () => {
+        toast.remove();
+      });
+    }
+
+    // Update loading progress indicators
+    function updateLoadingProgress(task, completed = false) {
+      // Update task state
+      if (task === 'initialize') loadingProgress.initialized = completed;
+      else if (task === 'connect') loadingProgress.connected = completed;
+      else if (task === 'ai') loadingProgress.aiLoaded = completed;
+      else if (task === 'chart') loadingProgress.chartPrepared = completed;
+      
+      // Update visual indicators
+      const taskElement = document.getElementById(`task-${task}`);
+      if (taskElement) {
+        if (completed) {
+          taskElement.className = 'loading-task-complete';
+          taskElement.innerHTML = '✓';
+        }
+      }
+      
+      // Calculate overall progress (each task = 25%)
+      loadingProgress.totalProgress = 0;
+      if (loadingProgress.initialized) loadingProgress.totalProgress += 25;
+      if (loadingProgress.connected) loadingProgress.totalProgress += 25;
+      if (loadingProgress.aiLoaded) loadingProgress.totalProgress += 25;
+      if (loadingProgress.chartPrepared) loadingProgress.totalProgress += 25;
+      
+      // Update progress bar
+      const progressBar = document.getElementById('loading-progress-bar');
+      if (progressBar) {
+        progressBar.style.width = `${loadingProgress.totalProgress}%`;
+      }
+      
+      // Check if all tasks are complete
+      if (loadingProgress.totalProgress >= 100) {
+        // Fade out the loading overlay after a short delay
+        setTimeout(() => {
+          const overlay = document.getElementById('loading-overlay');
+          if (overlay) {
+            overlay.classList.add('fade-out');
+            // Optional: completely remove from DOM after fade animation
+            setTimeout(() => {
+              overlay.style.display = 'none';
+            }, 300);
+          }
+        }, 500);
+      }
+    }
+    
+    try {
+      const supabaseModule = await import('./supabase-integration.js');
+      ({
+        supabaseClient,
+        signUp,
+        signIn,
+        signOut,
+        onAuthStateChange,
+        getMarketData,
+        convertCandlestickData,
+        subscribeToMarketData,
+        getWatchlists,
+        getSocialSentiment,
+        getNews,
+        getPrediction
+      } = supabaseModule);
+      
+      // Mark initialization task as complete
+      updateLoadingProgress('initialize', true);
+      
+    } catch (error) {
+      console.error('Error importing Supabase integration:', error);
+      showToast('error', 'Connection Error', 'Could not load Supabase integration. Using mock data instead.');
+      
+      // Minimal fallback stubs
+      signUp = async () => ({ error: { message: 'Signup not available' } });
+      signIn = async () => ({ error: { message: 'SignIn not available' } });
+      signOut = async () => ({ data: null, error: 'SignOut not available' });
+      onAuthStateChange = () => () => {};
+      getMarketData = async () => [];
+      convertCandlestickData = (d) => d;
+      subscribeToMarketData = () => () => {};
+      getWatchlists = async () => [];
+      getSocialSentiment = async () => ({ data: null, error: 'Not available' });
+      getNews = async () => ({ data: [], error: 'Not available' });
+      getPrediction = async () => ({ data: null, error: 'Not available' });
+      
+      // Still mark initialization as complete, even with mock data
+      updateLoadingProgress('initialize', true);
+    }
+
+    // Global variables
+    let chart;
+    let currentSymbol = 'MSFT';
+    let currentTimeframe = '1w';
+    let chartReady = false;
+
+    // DOM elements
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const chartLoading = document.getElementById('chart-loading');
+    const authModal = document.getElementById('auth-modal');
+    const loginButton = document.getElementById('login-button');
+    const userProfile = document.getElementById('user-profile');
+    const leftSidebar = document.getElementById('left-sidebar');
+    const rightPanels = document.getElementById('right-panels');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const panelsToggle = document.getElementById('panels-toggle');
+
+    // Sidebar toggle
+    sidebarToggle.addEventListener('click', () => {
+      leftSidebar.classList.toggle('collapsed');
+      sidebarToggle.classList.toggle('collapsed');
+      if (sidebarToggle.classList.contains('collapsed')) {
+        sidebarToggle.innerHTML = '<span>▶</span>';
+      } else {
+        sidebarToggle.innerHTML = '<span>◀</span>';
+      }
+    });
+
+    // Panels toggle
+    panelsToggle.addEventListener('click', () => {
+      rightPanels.classList.toggle('collapsed');
+      panelsToggle.classList.toggle('collapsed');
+      if (panelsToggle.classList.contains('collapsed')) {
+        panelsToggle.innerHTML = '<span>◀</span>';
+      } else {
+        panelsToggle.innerHTML = '<span>▶</span>';
+      }
+    });
+
+    // Tabs and forms
+    const loginTab = document.querySelector('[data-tab="login"]');
+    const signupTab = document.querySelector('[data-tab="signup"]');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+
+    // Additional controls
+    const timeWarpBtn = document.getElementById('time-warp-btn');
+    const vrModeBtn = document.getElementById('vr-mode-btn');
+    const lensBtn = document.getElementById('lens-btn');
+    const indicatorBtn = document.getElementById('indicator-btn');
+    const comparisonBtn = document.getElementById('comparison-btn');
+
+    // Timeframe buttons
+    const timeframeButtons = document.querySelectorAll('.timeframe-button');
+    timeframeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        timeframeButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        currentTimeframe = button.getAttribute('data-timeframe');
+        loadChartData();
+      });
+    });
+
+    // Panels
+    const aiContent = document.getElementById('ai-content');
+    const sentimentContent = document.getElementById('sentiment-content');
+    const newsContent = document.getElementById('news-content');
+    
+    // Panel refresh buttons
+    document.getElementById('ai-refresh').addEventListener('click', () => {
+      loadAIPredictions();
+    });
+    document.getElementById('sentiment-refresh').addEventListener('click', () => {
+      loadSocialSentiment();
+    });
+    document.getElementById('news-refresh').addEventListener('click', () => {
+      loadMarketNews();
+    });
+
+    // Tooltip functionality
+    document.addEventListener('mouseover', function(e) {
+      const tooltipAttr = e.target.getAttribute('data-tooltip');
+      if (tooltipAttr) {
+        showTooltip(e.target, tooltipAttr);
+      }
+    });
+
+    document.addEventListener('mouseout', function(e) {
+      if (e.target.getAttribute('data-tooltip')) {
+        hideTooltip();
+      }
+    });
+
+    function showTooltip(element, text) {
+      let tooltip = document.querySelector('.tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+      }
+      
+      tooltip.textContent = text;
+      tooltip.classList.add('visible');
+      
+      const rect = element.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      // Position the tooltip
+      tooltip.style.left = `${rect.left + (rect.width / 2) - (tooltipRect.width / 2)}px`;
+      tooltip.style.top = `${rect.top - tooltipRect.height - 10}px`;
+    }
+
+    function hideTooltip() {
+      const tooltip = document.querySelector('.tooltip');
+      if (tooltip) {
+        tooltip.classList.remove('visible');
+      }
+    }
+
+    // Chart class with advanced features
+    class CandlestickChart {
+      constructor(container) {
+        this.container = container;
+        this.data = [];
+        this.isReady = false;
+        this.clock = new THREE.Clock();
+        this.darkPoolMasses = [];  // Track dark pool masses
+        this.particleSystems = []; // All particle systems
+        this.heatmapLayer = null;  // Heatmap for liquidity visualization
+        this.tooltips = [];        // Array of tooltip objects for visualization
+        
+        // We'll initialize the scene once Three.js is loaded
+        this.initializeWhenReady();
+      }
+
+      async initializeWhenReady() {
+        // Check if Three.js is loaded, if not, wait for it
+        if (typeof THREE === 'undefined' || 
+            typeof THREE.EffectComposer === 'undefined' || 
+            typeof THREE.UnrealBloomPass === 'undefined') {
+          setTimeout(() => this.initializeWhenReady(), 100);
+          return;
+        }
+
+        // Scene
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x0f0f1a);
+
+        // Camera
+        this.camera = new THREE.PerspectiveCamera(
+          75,
+          this.container.clientWidth / this.container.clientHeight,
+          0.1,
+          1000
+        );
+        this.camera.position.set(5, 15, 30);
+
+        // Renderer
+        this.renderer = new THREE.WebGLRenderer({ 
+          antialias: true,
+          alpha: true,
+          logarithmicDepthBuffer: true // Better for mixed scale scenes
+        });
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
+        this.container.appendChild(this.renderer.domElement);
+
+        // Postprocessing setup
+        this.setupPostprocessing();
+
+        // Controls
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.maxPolarAngle = Math.PI / 1.5; // Limit rotation
+        this.controls.minDistance = 5;
+        this.controls.maxDistance = 80;
+
+        // Groups
+        this.candlesticks = new THREE.Group();
+        this.volumeBars = new THREE.Group();
+        this.darkPoolGroup = new THREE.Group(); // For dark pool visualizations
+        this.particleGroup = new THREE.Group(); // For particle systems
+        this.tooltipGroup = new THREE.Group(); // For 3D tooltips
+        
+        this.scene.add(this.candlesticks);
+        this.scene.add(this.volumeBars);
+        this.scene.add(this.darkPoolGroup);
+        this.scene.add(this.particleGroup);
+        this.scene.add(this.tooltipGroup);
+
+        // Grid
+        const gridHelper = new THREE.GridHelper(100, 20, 0x222236, 0x1a1a2e);
+        this.scene.add(gridHelper);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 20, 10);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        this.scene.add(directionalLight);
+        
+        // Add point lights for better highlights
+        const pointLight1 = new THREE.PointLight(0x6c5ce7, 0.5, 100);
+        pointLight1.position.set(20, 30, 20);
+        this.scene.add(pointLight1);
+        
+        const pointLight2 = new THREE.PointLight(0x00cec9, 0.3, 50);
+        pointLight2.position.set(-10, 20, -10);
+        this.scene.add(pointLight2);
+
+        // Initialize particle system materials
+        this.initializeParticleMaterials();
+        
+        // Initialize heatmap
+        this.initializeHeatmap();
+
+        // Event listeners
+        window.addEventListener('resize', this.onWindowResize.bind(this));
+        this.renderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this));
+        
+        // For gravitational lens and bloom effects
+        this.lensActive = false;
+        this.gravityStrength = 1.0;
+        this.darkPoolsVisible = true;
+        
+        // Create raycaster for tooltips
+        this.raycaster = new THREE.Raycaster();
+        this.mouse = new THREE.Vector2();
+
+        // Mark the chart as ready
+        this.isReady = true;
+        
+        // Signal that the chart is prepared
+        updateLoadingProgress('chart', true);
+        
+        // Start animation
+        this.animate();
+      }
+      
+      // Initialize post-processing effects (bloom + lens)
+      setupPostprocessing() {
+        // Create composer
+        this.composer = new THREE.EffectComposer(this.renderer);
+        
+        // Add render pass
+        const renderPass = new THREE.RenderPass(this.scene, this.camera);
+        this.composer.addPass(renderPass);
+        
+        // Add bloom for glow effects
+        this.bloomPass = new THREE.UnrealBloomPass(
+          new THREE.Vector2(this.container.clientWidth, this.container.clientHeight),
+          0.3,  // strength
+          0.4,  // radius
+          0.9   // threshold
+        );
+        this.composer.addPass(this.bloomPass);
+        
+        // Create custom gravitational lens shader
+        this.lensPass = new THREE.ShaderPass({
+          uniforms: {
+            tDiffuse: { value: null },
+            center: { value: new THREE.Vector2(0.5, 0.5) },
+            strength: { value: 0.0 },
+            resolution: { value: new THREE.Vector2(
+              this.container.clientWidth, 
+              this.container.clientHeight
+            )}
+          },
+          vertexShader: `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: document.getElementById('gravitationalLensShader').textContent
+        });
+        
+        this.composer.addPass(this.lensPass);
+        
+        // Make sure the final pass outputs to screen
+        this.lensPass.renderToScreen = true;
+      }
+      
+      // Initialize particle materials using custom shaders
+      initializeParticleMaterials() {
+        // Get shader code from script tags
+        const particleVertexShader = document.getElementById('particleVertexShader').textContent;
+        const particleFragmentShader = document.getElementById('particleFragmentShader').textContent;
+        
+        // Create shader material for particles
+        this.particleMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            time: { value: 0 },
+            size: { value: 3.0 },
+            speed: { value: 0.5 },
+            flowDirection: { value: new THREE.Vector3(0, 0.2, 0) }
+          },
+          vertexShader: particleVertexShader,
+          fragmentShader: particleFragmentShader,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          transparent: true
+        });
+      }
+      
+      // Initialize heatmap layer for volume/liquidity visualization
+      initializeHeatmap() {
+        // Create a plane geometry for the heatmap
+        const geometry = new THREE.PlaneGeometry(100, 50, 100, 50);
+        
+        // Create a custom heatmap material
+        const heatmapMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            volumeData: { value: null }, // Will be updated with volume data texture
+            minPrice: { value: 0.0 },
+            maxPrice: { value: 100.0 },
+            hotColor: { value: new THREE.Color(0xff7675) },  // Red for high volume
+            coldColor: { value: new THREE.Color(0x00cec9) }  // Blue for low volume
+          },
+          vertexShader: `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform sampler2D volumeData;
+            uniform float minPrice;
+            uniform float maxPrice;
+            uniform vec3 hotColor;
+            uniform vec3 coldColor;
+            
+            varying vec2 vUv;
+            
+            void main() {
+              float volume = texture2D(volumeData, vUv).r;
+              vec3 color = mix(coldColor, hotColor, volume);
+              float alpha = smoothstep(0.0, 0.5, volume) * 0.6;
+              gl_FragColor = vec4(color, alpha);
+            }
+          `,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        
+        // Create the heatmap mesh and position it
+        this.heatmapLayer = new THREE.Mesh(geometry, heatmapMaterial);
+        this.heatmapLayer.rotation.x = -Math.PI / 2; // Make it horizontal
+        this.heatmapLayer.position.y = -0.1; // Just below the grid
+        this.heatmapLayer.visible = false; // Hidden by default
+        
+        this.scene.add(this.heatmapLayer);
+      }
+
+      onWindowResize() {
+        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+      }
+
+      animate() {
+        requestAnimationFrame(this.animate.bind(this));
+        this.controls.update();
+
+        // If lens is active, apply a placeholder lens effect
+        if (this.lensActive) {
+          this.applyGravitationalLensEffect();
+        }
+
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      setData(data) {
+        if (!this.isReady) {
+          // If chart isn't ready yet, queue the data to be set when ready
+          setTimeout(() => this.setData(data), 100);
+          return;
+        }
+        
+        this.data = data;
+        this.minPrice = Math.min(...data.map(d => d.low));
+        this.maxPrice = Math.max(...data.map(d => d.high));
+        this.maxVolume = Math.max(...data.map(d => d.volume));
+        this.renderCandlesticks();
+        
+        // Hide chart loading overlay
+        if (chartLoading) {
+          chartLoading.classList.add('loaded');
+        }
+      }
+
+      renderCandlesticks() {
+        // Clear existing
+        while (this.candlesticks.children.length > 0) {
+          this.candlesticks.remove(this.candlesticks.children[0]);
+        }
+        while (this.volumeBars.children.length > 0) {
+          this.volumeBars.remove(this.volumeBars.children[0]);
+        }
+        
+        // Also clear market depth if exists
+        if (this.marketDepth) {
+          this.scene.remove(this.marketDepth);
+          this.marketDepth = null;
+        }
+
+        const priceRange = this.maxPrice - this.minPrice;
+        const scaleFactor = 20 / priceRange;
+
+        const bullishMaterial = new THREE.MeshStandardMaterial({
+          color: 0x00b894,
+          metalness: 0.2,
+          roughness: 0.5
+        });
+        const bearishMaterial = new THREE.MeshStandardMaterial({
+          color: 0xff7675,
+          metalness: 0.2,
+          roughness: 0.5
+        });
+        const wickMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+        // Arrays to hold price distribution data for market depth
+        const pricePoints = 100; // Resolution of depth chart
+        const bidDistribution = new Array(pricePoints).fill(0);
+        const askDistribution = new Array(pricePoints).fill(0);
+        
+        this.data.forEach((candle, index) => {
+          const isBullish = candle.close >= candle.open;
+          const material = isBullish ? bullishMaterial : bearishMaterial;
+
+          const bodyHeight = Math.abs(candle.open - candle.close) * scaleFactor;
+          const bodyBottom = Math.min(candle.open, candle.close);
+          const bodyPosition = (bodyBottom - this.minPrice) * scaleFactor + bodyHeight / 2;
+
+          // Candle body
+          const bodyGeometry = new THREE.BoxGeometry(0.8, Math.max(bodyHeight, 0.01), 0.8);
+          const body = new THREE.Mesh(bodyGeometry, material);
+          body.position.set(index * 1.2, bodyPosition, 0);
+
+          // Wick
+          const wickGeometry = new THREE.BufferGeometry();
+          const wickStart = new THREE.Vector3(index * 1.2, (candle.low - this.minPrice) * scaleFactor, 0);
+          const wickEnd = new THREE.Vector3(index * 1.2, (candle.high - this.minPrice) * scaleFactor, 0);
+          wickGeometry.setFromPoints([wickStart, wickEnd]);
+          const wick = new THREE.Line(wickGeometry, wickMaterial);
+
+          // Volume bar
+          const volumeHeight = (candle.volume / this.maxVolume) * 10;
+          const volumeGeometry = new THREE.BoxGeometry(0.7, volumeHeight, 0.7);
+          const volumeMat = new THREE.MeshStandardMaterial({
+            color: isBullish ? 0x00b894 : 0xff7675,
+            transparent: true,
+            opacity: 0.5
+          });
+          const volumeBar = new THREE.Mesh(volumeGeometry, volumeMat);
+          volumeBar.position.set(index * 1.2, volumeHeight / 2, -3);
+
+          this.candlesticks.add(body);
+          this.candlesticks.add(wick);
+          this.volumeBars.add(volumeBar);
+          
+          // Contribute to market depth data
+          // For demonstration, we'll use candle ranges to simulate bid/ask distribution
+          // In a real implementation, you would use actual order book data
+          
+          // Convert price to distribution index
+          const priceRange = this.maxPrice - this.minPrice;
+          const indexLow = Math.floor((candle.low - this.minPrice) / priceRange * pricePoints);
+          const indexHigh = Math.floor((candle.high - this.minPrice) / priceRange * pricePoints);
+          const indexClose = Math.floor((candle.close - this.minPrice) / priceRange * pricePoints);
+          
+          // Add volume to distribution (splitting between bid/ask based on bullish/bearish)
+          const volumeContribution = candle.volume / this.maxVolume * 5;
+          
+          for (let i = indexLow; i <= indexHigh; i++) {
+            if (i >= 0 && i < pricePoints) {
+              // More volume near close price, less at extremes
+              const distanceFromClose = Math.abs(i - indexClose) / (indexHigh - indexLow || 1);
+              const contribution = volumeContribution * (1 - distanceFromClose);
+              
+              if (isBullish) {
+                // For bullish candles, more bids at bottom, more asks near top
+                const bidWeight = 1 - (i - indexLow) / (indexHigh - indexLow || 1);
+                bidDistribution[i] += contribution * bidWeight;
+                askDistribution[i] += contribution * (1 - bidWeight);
+              } else {
+                // For bearish candles, more asks at top, more bids near bottom
+                const askWeight = (i - indexLow) / (indexHigh - indexLow || 1);
+                bidDistribution[i] += contribution * (1 - askWeight);
+                askDistribution[i] += contribution * askWeight;
+              }
+            }
+          }
+        });
+        
+        // Create market depth visualization
+        this.createMarketDepthVisualization(bidDistribution, askDistribution, scaleFactor);
+
+        this.candlesticks.position.x = -this.data.length * 0.6;
+        this.volumeBars.position.x = -this.data.length * 0.6;
+      }
+      
+      createMarketDepthVisualization(bidDistribution, askDistribution, scaleFactor) {
+        // Create a market depth surface
+        const width = 100; // Width of the surface
+        const depth = 30;  // Depth (z-dimension) of the surface
+        
+        // Create geometry for the market depth
+        const resolution = bidDistribution.length;
+        const geometry = new THREE.BufferGeometry();
+        
+        const vertices = [];
+        const colors = [];
+        const indices = [];
+        
+        // Create a curved surface with vertices
+        for (let z = 0; z < depth; z++) {
+          for (let x = 0; x < resolution; x++) {
+            // Position
+            const xPos = (x / resolution) * width - width / 2;
+            // y position based on distribution data, more height closer to center
+            const zDepthFactor = 1 - (z / depth);
+            const bidHeight = bidDistribution[x] * zDepthFactor * 3;
+            const askHeight = askDistribution[x] * zDepthFactor * 3;
+            const yPos = (x < resolution / 2) ? bidHeight : askHeight;
+            const zPos = -5 - z;
+            
+            vertices.push(xPos, yPos, zPos);
+            
+            // Colors
+            const colorIntensity = Math.min(1.0, yPos * 0.5);
+            if (x < resolution / 2) {
+                // Bids - green gradient
+                colors.push(0, 0.5 + colorIntensity * 0.5, 0.2 + colorIntensity * 0.8);
+            } else {
+                // Asks - red gradient
+                colors.push(0.5 + colorIntensity * 0.5, 0.1 + colorIntensity * 0.2, 0.1 + colorIntensity * 0.3);
+            }
+        }
+      }
+        
+        // Create faces (triangles) between vertices
+        for (let z = 0; z < depth - 1; z++) {
+            for (let x = 0; x < resolution - 1; x++) {
+                const topLeft = z * resolution + x;
+                const topRight = topLeft + 1;
+                const bottomLeft = (z + 1) * resolution + x;
+                const bottomRight = bottomLeft + 1;
+                
+                // First triangle
+                indices.push(topLeft, bottomLeft, topRight);
+                // Second triangle
+                indices.push(topRight, bottomLeft, bottomRight);
+            }
+        }
+        
+        // Set attributes
+        geometry.setIndex(indices);
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        
+        // Create material
+        const material = new THREE.MeshStandardMaterial({
+            vertexColors: true,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.85,
+            metalness: 0.2,
+            roughness: 0.8
+        });
+        
+        // Create mesh
+        this.marketDepth = new THREE.Mesh(geometry, material);
+        this.marketDepth.position.x = -this.data.length * 0.5;
+        this.marketDepth.position.y = 0;
+        this.scene.add(this.marketDepth);
+        
+        // Add subtle animation
+        const animate = () => {
+            if (this.marketDepth) {
+                const time = Date.now() * 0.001;
+                // Subtle movement based on time
+                for (let i = 0; i < geometry.attributes.position.array.length / 3; i++) {
+                    const idx = i * 3;
+                    const x = geometry.attributes.position.array[idx];
+                    const z = geometry.attributes.position.array[idx + 2];
+                    // Add small wave effect
+                    geometry.attributes.position.array[idx + 1] += Math.sin(time + x * 0.1 + z * 0.1) * 0.01;
+                }
+                geometry.attributes.position.needsUpdate = true;
+            }
+        };
+        
+        // Run animation every few frames to save performance
+        this.marketDepthAnimationInterval = setInterval(animate, 100);
+      }
+
+      toggleView() {
+        // Cycle camera position
+        if (this.camera.position.z > 20) {
+          this.camera.position.set(0, 35, 0);
+          this.controls.target.set(0, 0, 0);
+        } else if (this.camera.position.y > 20) {
+          this.camera.position.set(30, 10, 0);
+          this.controls.target.set(0, 10, 0);
+        } else {
+          this.camera.position.set(5, 15, 30);
+          this.controls.target.set(0, 10, 0);
+        }
+      }
+
+      onMouseMove(event) {
+        // Calculate mouse position in normalized device coordinates (-1 to +1)
+        const rect = this.renderer.domElement.getBoundingClientRect();
+        this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        // Check for dark pool tooltips
+        this.checkDarkPoolTooltips();
+      }
+      
+      // Check if mouse is over any dark pool mass and show tooltip
+      checkDarkPoolTooltips() {
+        if (!this.isReady || !this.darkPoolsVisible) return;
+        
+        // Update the raycaster with the camera and mouse position
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        
+        // Check for intersections with dark pool objects
+        const intersects = this.raycaster.intersectObjects(this.darkPoolGroup.children);
+        
+        // If we have intersections, show tooltip information
+        if (intersects.length > 0) {
+          const darkPool = intersects[0].object;
+          const poolData = darkPool.userData.darkPoolData;
+          
+          // Create tooltip text for this dark pool
+          let tooltipHtml = `
+            <div class="dark-pool-tooltip">
+              <div class="tooltip-title">Dark Pool Activity</div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">Volume:</span>
+                <span class="tooltip-value">${poolData.volume.toLocaleString()}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">Price:</span>
+                <span class="tooltip-value">$${poolData.price.toFixed(2)}</span>
+              </div>
+              <div class="tooltip-row">
+                <span class="tooltip-label">Gravitational Pull:</span>
+                <span class="tooltip-value">${(poolData.gravity * 100).toFixed(1)}%</span>
+              </div>
+            </div>
+          `;
+          
+          // Display tooltip
+          showTooltip(intersects[0].object.position, tooltipHtml);
+        } else {
+          // Hide tooltip when not hovering
+          hideTooltip();
+        }
+        
+        // Helper function to show tooltips
+        function showTooltip(position, html) {
+          // Get tooltip or create one if it doesn't exist
+          let tooltip = document.querySelector('.tooltip-3d');
+          if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.className = 'tooltip-3d';
+            document.body.appendChild(tooltip);
+            
+            // Style the tooltip
+            tooltip.style.position = 'absolute';
+            tooltip.style.padding = '10px 15px';
+            tooltip.style.backgroundColor = 'rgba(26, 26, 46, 0.95)';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.color = '#fff';
+            tooltip.style.fontSize = '14px';
+            tooltip.style.pointerEvents = 'none';
+            tooltip.style.zIndex = '1000';
+            tooltip.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.3)';
+            tooltip.style.borderLeft = '3px solid var(--primary-color)';
+            tooltip.style.maxWidth = '300px';
+          }
+          
+          // Add the tooltip content
+          tooltip.innerHTML = html;
+          
+          // Position tooltip - convert 3D position to 2D screen coordinates
+          const vector = position.clone();
+          vector.project(this.camera);
+          
+          const x = (vector.x * 0.5 + 0.5) * this.renderer.domElement.clientWidth;
+          const y = (vector.y * -0.5 + 0.5) * this.renderer.domElement.clientHeight;
+          
+          tooltip.style.left = `${x}px`;
+          tooltip.style.top = `${y - tooltip.offsetHeight - 15}px`; // Position above the point
+          tooltip.style.display = 'block';
+        }
+        
+        // Helper function to hide tooltips
+        function hideTooltip() {
+          const tooltip = document.querySelector('.tooltip-3d');
+          if (tooltip) {
+            tooltip.style.display = 'none';
+          }
+        }
+      }
+  
+      // Create dark pool visualization
+      createDarkPool(position, volume, price) {
+        // Create the dark pool object
+        const geometry = new THREE.SphereGeometry(1, 32, 32);
+        
+        // Create a custom shader material for the dark pool
+        const material = new THREE.ShaderMaterial({
+          uniforms: {
+            time: { value: 0 },
+            color: { value: new THREE.Color(0x6c5ce7) },
+            strength: { value: volume / this.maxVolume }
+          },
+          vertexShader: `
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            
+            void main() {
+              vPosition = position;
+              vNormal = normal;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform float time;
+            uniform vec3 color;
+            uniform float strength;
+            
+            varying vec3 vPosition;
+            varying vec3 vNormal;
+            
+            void main() {
+              // Pulsating effect
+              float pulse = 0.5 + 0.5 * sin(time * 2.0);
+              
+              // Fresnel effect (more glow at edges)
+              vec3 viewDirection = normalize(cameraPosition - vPosition);
+              float fresnel = dot(viewDirection, vNormal);
+              fresnel = pow(1.0 - fresnel, 3.0);
+              
+              // Combine effects
+              vec3 finalColor = mix(color, color * 1.5, pulse * fresnel);
+              float alpha = 0.7 * strength + 0.2 * fresnel * pulse;
+              
+              gl_FragColor = vec4(finalColor, alpha);
+            }
+          `,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        
+        // Create the sphere
+        const darkPoolSphere = new THREE.Mesh(geometry, material);
+        
+        // Size based on volume
+        const size = Math.max(1, Math.min(5, 1 + 4 * (volume / this.maxVolume)));
+        darkPoolSphere.scale.set(size, size, size);
+        
+        // Position
+        darkPoolSphere.position.copy(position);
+        
+        // Store dark pool data
+        darkPoolSphere.userData.darkPoolData = {
+          volume: volume,
+          price: price,
+          gravity: volume / this.maxVolume,
+          position: position.clone()
+        };
+        
+        // Add to dark pool group
+        this.darkPoolGroup.add(darkPoolSphere);
+        this.darkPoolMasses.push(darkPoolSphere);
+        
+        // Create particle effects for this dark pool
+        this.createParticleEffect(position, volume);
+        
+        return darkPoolSphere;
+      }
+      
+      // Create particle system for flow visualization
+      createParticleEffect(position, volume) {
+        const PARTICLE_COUNT = Math.min(2000, Math.floor(volume / 10));
+        
+        // Create geometry for particles
+        const geometry = new THREE.BufferGeometry();
+        
+        // Create arrays for attributes
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        const velocities = new Float32Array(PARTICLE_COUNT * 3);
+        const ages = new Float32Array(PARTICLE_COUNT);
+        
+        // Fill the arrays with random values
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          // Position - start near dark pool
+          const radius = Math.random() * 2;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+          
+          positions[i * 3] = position.x + radius * Math.sin(phi) * Math.cos(theta);
+          positions[i * 3 + 1] = position.y + radius * Math.sin(phi) * Math.sin(theta);
+          positions[i * 3 + 2] = position.z + radius * Math.cos(phi);
+          
+          // Velocity - move outward from center
+          velocities[i * 3] = Math.sin(phi) * Math.cos(theta) * (0.2 + Math.random() * 0.8);
+          velocities[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * (0.2 + Math.random() * 0.8);
+          velocities[i * 3 + 2] = Math.cos(phi) * (0.2 + Math.random() * 0.8);
+          
+          // Random starting age
+          ages[i] = Math.random();
+        }
+        
+        // Add attributes to geometry
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+        geometry.setAttribute('age', new THREE.BufferAttribute(ages, 1));
+        
+        // Create material - clone from the base particle material
+        const material = this.particleMaterial.clone();
+        
+        // Customize material for this particle system
+        material.uniforms.size.value = Math.max(2, 3 * (volume / this.maxVolume));
+        material.uniforms.flowDirection.value.set(
+          Math.random() * 0.4 - 0.2,
+          Math.random() * 0.4,
+          Math.random() * 0.4 - 0.2
+        );
+        
+        // Create the particle system
+        const particleSystem = new THREE.Points(geometry, material);
+        
+        // Add to scene
+        this.particleGroup.add(particleSystem);
+        this.particleSystems.push({
+          system: particleSystem,
+          material: material,
+          darkPoolPosition: position.clone(),
+          volume: volume
+        });
+        
+        return particleSystem;
+      }
+      
+      // Create heatmap data texture
+      updateHeatmapData() {
+        if (!this.heatmapLayer || !this.data || this.data.length === 0) return;
+        
+        // Create data array for volume distribution
+        const width = 256;
+        const height = 256;
+        const size = width * height;
+        const data = new Uint8Array(size * 4); // RGBA
+        
+        // Initialize with zeros
+        for (let i = 0; i < size * 4; i++) {
+          data[i] = 0;
+        }
+        
+        // Map price range to texture coordinates
+        const priceRange = this.maxPrice - this.minPrice;
+        
+        // Fill data based on volume at each price point
+        for (let i = 0; i < this.data.length; i++) {
+          const candle = this.data[i];
+          
+          // Map time to X coordinate (0 to width-1)
+          const x = Math.floor((i / this.data.length) * (width - 1));
+          
+          // Calculate range of prices in this candle
+          const highY = Math.floor(((candle.high - this.minPrice) / priceRange) * (height - 1));
+          const lowY = Math.floor(((candle.low - this.minPrice) / priceRange) * (height - 1));
+          
+          // Volume normalized to 0-1 range
+          const volumeValue = Math.min(1, candle.volume / this.maxVolume);
+          
+          // Fill in the range from low to high with volume data
+          for (let y = lowY; y <= highY; y++) {
+            // Distance from price center (for gaussian distribution)
+            const priceCenter = (candle.open + candle.close) / 2;
+            const priceCenterY = Math.floor(((priceCenter - this.minPrice) / priceRange) * (height - 1));
+            const distance = Math.abs(y - priceCenterY) / (highY - lowY || 1);
+            
+            // Gaussian dropoff
+            const intensity = volumeValue * Math.exp(-5 * distance * distance);
+            
+            // Calculate index in the data array
+            const index = (y * width + x) * 4;
+            
+            // Add to existing value (allows for accumulation)
+            data[index] = Math.min(255, data[index] + Math.floor(intensity * 255));
+            data[index + 1] = 0;
+            data[index + 2] = 0;
+            data[index + 3] = 255;
+          }
+        }
+        
+        // Create texture from data
+        const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+        texture.needsUpdate = true;
+        
+        // Update heatmap material
+        this.heatmapLayer.material.uniforms.volumeData.value = texture;
+        this.heatmapLayer.material.uniforms.minPrice.value = this.minPrice;
+        this.heatmapLayer.material.uniforms.maxPrice.value = this.maxPrice;
+        
+        // Show heatmap
+        this.heatmapLayer.visible = true;
+      }
+      
+      // Update advanced gravitational lens effect
+      applyGravitationalLensEffect() {
+        if (!this.isReady || !this.lensActive) return;
+        
+        // Get the elapsed time
+        const time = this.clock.getElapsedTime();
+        
+        // Update particle systems
+        for (const particleSystem of this.particleSystems) {
+          particleSystem.material.uniforms.time.value = time;
+        }
+        
+        // Update dark pool materials
+        for (const darkPool of this.darkPoolMasses) {
+          darkPool.material.uniforms.time.value = time;
+        }
+        
+        // Find the most prominent dark pool (highest volume)
+        if (this.darkPoolMasses.length > 0) {
+          let primaryDarkPool = this.darkPoolMasses[0];
+          let highestVolume = primaryDarkPool.userData.darkPoolData.volume;
+          
+          for (let i = 1; i < this.darkPoolMasses.length; i++) {
+            const volume = this.darkPoolMasses[i].userData.darkPoolData.volume;
+            if (volume > highestVolume) {
+              highestVolume = volume;
+              primaryDarkPool = this.darkPoolMasses[i];
+            }
+          }
+          
+          // Update lens shader to focus on this dark pool
+          // Convert 3D position to screen coordinates
+          const vector = primaryDarkPool.position.clone();
+          vector.project(this.camera);
+          
+          // Convert to normalized coordinates for shader (0 to 1)
+          const x = (vector.x + 1) / 2;
+          const y = (vector.y + 1) / 2;
+          
+          // Update lens shader uniforms
+          if (this.lensPass) {
+            this.lensPass.uniforms.center.value.set(x, y);
+            
+            // Modulate strength based on view angle and time
+            const baseStrength = this.gravityStrength * (primaryDarkPool.userData.darkPoolData.volume / this.maxVolume);
+            const pulseFactor = 0.8 + 0.2 * Math.sin(time * 0.5);
+            this.lensPass.uniforms.strength.value = baseStrength * pulseFactor;
+          }
+          
+          // Apply shader-based lens effects instead of geometry distortion
+          // This is much more efficient and realistic looking
+          
+          // However, we'll still do some subtle geometry warping for visual effect
+          this.candlesticks.children.forEach(child => {
+            if (!child.position) return;
+            
+            // Calculate distance to primary dark pool
+            const distanceToCenter = child.position.distanceTo(primaryDarkPool.position);
+            if (distanceToCenter < 15) {
+              // Calculate distortion factor - closer objects get more distorted
+              const pullFactor = 1 - distanceToCenter / 15;
+              
+              // Only store original scale once
+              if (!child.userData.originalScale) {
+                child.userData.originalScale = child.scale.clone();
+                child.userData.originalPosition = child.position.clone();
+              }
+              
+              // Wobble effect based on time
+              const wobble = Math.sin(time * 2 + child.position.x * 0.1) * 0.05;
+              
+              // Pull slightly toward the center based on distance
+              if (child.userData.originalPosition) {
+                const pullDirection = new THREE.Vector3().subVectors(
+                  primaryDarkPool.position, 
+                  child.userData.originalPosition
+                ).normalize();
+                
+                // Apply pull with wobble
+                child.position.copy(child.userData.originalPosition.clone());
+                child.position.add(pullDirection.multiplyScalar(pullFactor * 0.5 * (1 + wobble)));
+              }
+              
+              // Distort the scale 
+              if (child.userData.originalScale) {
+                const pulseScale = 1 + pullFactor * 0.3 * Math.sin(time * 3 + child.position.z * 0.2);
+                child.scale.set(
+                  child.userData.originalScale.x * (1 + pullFactor * 0.3),
+                  child.userData.originalScale.y * pulseScale,
+                  child.userData.originalScale.z * (1 + pullFactor * 0.3)
+                );
+              }
+            } else if (child.userData.originalPosition) {
+              // Reset position and scale when out of range
+              child.position.copy(child.userData.originalPosition);
+              if (child.userData.originalScale) {
+                child.scale.copy(child.userData.originalScale);
+              }
+            }
+          });
+        }
+      }
+
+      setLensActive(active) {
+        this.lensActive = active;
+        showToast('info', 'Gravitational Lens', `Lens effect ${active ? 'activated' : 'deactivated'}`);
+      }
+
+      // VR mode with WebXR support
+      enableVRMode() {
+        showToast('info', 'VR Mode', 'Entering virtual reality mode.');
+        
+        if (!this.isReady) return;
+        
+        // Check if WebXR is supported by the browser
+        if ('xr' in navigator) {
+          // Check if VR is supported
+          navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+            if (supported) {
+              this.initWebXR();
+            } else {
+              showToast('warning', 'VR Not Supported', 'Your browser supports WebXR, but VR is not available');
+            }
+          });
+        } else {
+          showToast('error', 'WebXR Not Supported', 'Your browser does not support WebXR');
+          // Fallback to fake VR experience (just move the camera to an immersive position)
+          this.camera.position.set(0, 15, 0.1);
+          this.controls.target.set(0, 10, -20);
+          this.camera.lookAt(new THREE.Vector3(0, 10, -20));
+        }
+      }
+      
+      // Initialize WebXR for true VR experience
+      initWebXR() {
+        if (!this.renderer) return;
+        
+        try {
+          // Enable XR
+          this.renderer.xr.enabled = true;
+          
+          // Create VR button
+          const vrButton = document.createElement('button');
+          vrButton.style.position = 'absolute';
+          vrButton.style.bottom = '20px';
+          vrButton.style.left = '50%';
+          vrButton.style.transform = 'translateX(-50%)';
+          vrButton.style.padding = '10px 20px';
+          vrButton.style.backgroundColor = 'var(--primary-color)';
+          vrButton.style.color = 'white';
+          vrButton.style.border = 'none';
+          vrButton.style.borderRadius = '6px';
+          vrButton.style.zIndex = '999';
+          vrButton.textContent = 'ENTER VR';
+          
+          // WebXR session options
+          const sessionOptions = {
+            optionalFeatures: ['local-floor', 'bounded-floor']
+          };
+          
+          // Set up XR session start and end
+          vrButton.addEventListener('click', () => {
+            navigator.xr.requestSession('immersive-vr', sessionOptions).then((session) => {
+              this.renderer.xr.setSession(session);
+              session.addEventListener('end', () => {
+                vrButton.textContent = 'ENTER VR';
+                showToast('info', 'VR Ended', 'Exited virtual reality mode');
+              });
+              vrButton.textContent = 'EXIT VR';
+              
+              // Set up controllers
+              this.setupVRControllers(session);
+            });
+          });
+          
+          this.container.parentNode.appendChild(vrButton);
+          
+        } catch (error) {
+          console.error('Error initializing WebXR:', error);
+          showToast('error', 'VR Error', 'Failed to initialize VR mode: ' + error.message);
+        }
+      }
+      
+      // Set up VR controllers
+      setupVRControllers(session) {
+        // For complete implementation, we would:
+        // 1. Create controller models
+        // 2. Set up interaction rays
+        // 3. Handle selection events
+        // 4. Implement locomotion
+        
+        // This is a placeholder for those features
+        console.log('VR controllers would be initialized here', session);
+      }
+
+      // Time-warp replay - animate through historical data
+      timeWarpReplay() {
+        showToast('info', 'Time-Warp', 'Initiating time-warp visualization.');
+        
+        if (!this.isReady || !this.data || this.data.length === 0) return;
+        
+        // Stop any existing animation
+        if (this.timeWarpAnimation) {
+          clearInterval(this.timeWarpAnimation);
+          this.timeWarpAnimation = null;
+        }
+        
+        // Create a copy of the data for animation
+        const originalData = [...this.data];
+        let visibleCount = 10; // Start with just a few candles
+        const maxCount = originalData.length;
+        let direction = 1; // 1 = forward, -1 = backward
+        let speed = 300; // milliseconds between frames
+        
+        // Create animation controls overlay
+        const controls = document.createElement('div');
+        controls.className = 'time-warp-controls';
+        controls.style.position = 'absolute';
+        controls.style.bottom = '80px';
+        controls.style.left = '50%';
+        controls.style.transform = 'translateX(-50%)';
+        controls.style.backgroundColor = 'rgba(26, 26, 46, 0.8)';
+        controls.style.padding = '10px';
+        controls.style.borderRadius = '6px';
+        controls.style.zIndex = '30';
+        controls.style.display = 'flex';
+        controls.style.gap = '10px';
+        controls.style.backdropFilter = 'blur(5px)';
+        
+        controls.innerHTML = `
+          <button id="tw-slower">◀◀</button>
+          <button id="tw-backward">◀</button>
+          <button id="tw-pause">❚❚</button>
+          <button id="tw-forward">▶</button>
+          <button id="tw-faster">▶▶</button>
+          <button id="tw-close">✕</button>
+        `;
+        
+        this.container.parentNode.appendChild(controls);
+        
+        // Animation state
+        let paused = false;
+        
+        // Animation function
+        const animate = () => {
+          if (paused) return;
+          
+          // Update visible count based on direction
+          visibleCount += direction;
+          
+          // Loop if we reach the edges
+          if (visibleCount > maxCount) {
+            visibleCount = 10;
+          } else if (visibleCount < 10) {
+            visibleCount = maxCount;
+          }
+          
+          // Get the visible slice of data
+          const visibleData = originalData.slice(0, visibleCount);
+          
+          // Update the chart with the visible data
+          this.data = visibleData;
+          this.minPrice = Math.min(...visibleData.map(d => d.low));
+          this.maxPrice = Math.max(...visibleData.map(d => d.high));
+          this.maxVolume = Math.max(...visibleData.map(d => d.volume));
+          this.renderCandlesticks();
+        };
+        
+        // Start animation
+        this.timeWarpAnimation = setInterval(animate, speed);
+        
+        // Control handlers
+        document.getElementById('tw-slower').addEventListener('click', () => {
+          speed += 100;
+          if (speed > 1000) speed = 1000;
+          clearInterval(this.timeWarpAnimation);
+          this.timeWarpAnimation = setInterval(animate, speed);
+        });
+        
+        document.getElementById('tw-faster').addEventListener('click', () => {
+          speed -= 100;
+          if (speed < 100) speed = 100;
+          clearInterval(this.timeWarpAnimation);
+          this.timeWarpAnimation = setInterval(animate, speed);
+        });
+        
+        document.getElementById('tw-backward').addEventListener('click', () => {
+          direction = -1;
+        });
+        
+        document.getElementById('tw-forward').addEventListener('click', () => {
+          direction = 1;
+        });
+        
+        document.getElementById('tw-pause').addEventListener('click', () => {
+          paused = !paused;
+          document.getElementById('tw-pause').textContent = paused ? '▶' : '❚❚';
+        });
+        
+        document.getElementById('tw-close').addEventListener('click', () => {
+          clearInterval(this.timeWarpAnimation);
+          this.timeWarpAnimation = null;
+          controls.remove();
+          
+          // Restore original data
+          this.data = originalData;
+          this.minPrice = Math.min(...originalData.map(d => d.low));
+          this.maxPrice = Math.max(...originalData.map(d => d.high));
+          this.maxVolume = Math.max(...originalData.map(d => d.volume));
+          this.renderCandlesticks();
+        });
+      }
+    }
+
+    // Auth & UI code
+    loginButton.addEventListener('click', () => {
+      authModal.classList.add('visible');
+    });
+
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      loginForm.style.display = 'flex';
+      signupForm.style.display = 'none';
+    });
+
+    signupTab.addEventListener('click', () => {
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      signupForm.style.display = 'flex';
+      loginForm.style.display = 'none';
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-message');
+      msg.textContent = 'Logging in...';
+      try {
+        const resp = await signIn(email, password);
+        if (resp.error) {
+          msg.textContent = resp.error.message;
+          return;
+        }
+        msg.textContent = 'Login successful!';
+        setTimeout(() => {
+          authModal.classList.remove('visible');
+          updateUserInterface(true);
+        }, 1000);
+      } catch (err) {
+        msg.textContent = err.message || 'Error logging in.';
+      }
+    });
+
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const msg = document.getElementById('signup-message');
+      msg.textContent = 'Creating account...';
+      try {
+        const resp = await signUp(email, password);
+        if (resp.error) {
+          msg.textContent = resp.error.message;
+          return;
+        }
+        msg.textContent = 'Account created! You can now log in.';
+        setTimeout(() => {
+          loginTab.click();
+        }, 2000);
+      } catch (err) {
+        msg.textContent = err.message || 'Error creating account.';
+      }
+    });
+
+    // Time-warp & VR & Lens toggles
+    timeWarpBtn?.addEventListener('click', () => {
+      if (chart) chart.timeWarpReplay();
+    });
+    vrModeBtn?.addEventListener('click', () => {
+      if (chart) chart.enableVRMode();
+    });
+    lensBtn?.addEventListener('click', () => {
+      if (!chart) return;
+      chart.setLensActive(!chart.lensActive);
+    });
+
+    // Add these new button handlers
+    indicatorBtn?.addEventListener('click', () => {
+      showToast('info', 'Indicators', 'Technical indicator selector will appear here.');
+    });
+    comparisonBtn?.addEventListener('click', () => {
+      showToast('info', 'Compare Assets', 'Asset comparison tool will appear here.');
+    });
+
+    function updateUserInterface(isLoggedIn) {
+      if (isLoggedIn) {
+        loginButton.style.display = 'none';
+        userProfile.style.display = 'flex';
+        loadAllPanels();
+      } else {
+        loginButton.style.display = 'block';
+        userProfile.style.display = 'none';
+      }
+    }
+
+    // Asynchronously load all panels
+    async function loadAllPanels() {
+      // Load panels in parallel for better performance
+      Promise.all([
+        loadAIPredictions(),
+        loadSocialSentiment(),
+        loadMarketNews()
+      ]).then(() => {
+        console.log('All panels loaded');
+      }).catch(err => {
+        console.error('Error loading panels:', err);
+      });
+    }
+
+    // Load AI predictions independently
+    async function loadAIPredictions() {
+      try {
+        // Reset to skeleton loader state
+        aiContent.innerHTML = `
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        `;
+        
+        // Fetch predictions
+        const { data: aiData, error: aiErr } = await getPrediction(currentSymbol, '7d');
+        
+        if (aiErr) {
+          aiContent.textContent = `Error: ${aiErr}`;
+          return;
+        }
+        
+        if (aiData) {
+          aiContent.innerHTML = `
+            <div>Target Price: $${aiData.target_price}</div>
+            <div>Confidence: ${aiData.confidence}%</div>
+            <div>Resistance: ${aiData.resistance || 'N/A'}</div>
+            <div>Support: ${aiData.support || 'N/A'}</div>
+            <div><em>${aiData.reasoning || ''}</em></div>
+          `;
+        } else {
+          aiContent.textContent = 'No AI prediction found.';
+        }
+        
+        // Mark AI as loaded
+        updateLoadingProgress('ai', true);
+        
+      } catch (err) {
+        console.error('Error loading AI predictions:', err);
+        aiContent.textContent = 'Error loading predictions.';
+      }
+    }
+
+    // Load social sentiment independently
+    async function loadSocialSentiment() {
+      try {
+        // Reset to skeleton loader state
+        sentimentContent.innerHTML = `
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        `;
+        
+        // Fetch data
+        const { data: sentData, error: sentErr } = await getSocialSentiment(currentSymbol);
+        
+        if (sentErr) {
+          sentimentContent.textContent = `Error: ${sentErr}`;
+          return;
+        }
+        
+        if (sentData) {
+          sentimentContent.innerHTML = `
+            <div>Score: ${sentData.score}</div>
+            <div>Bullish: ${sentData.bullish}%</div>
+            <div>Bearish: ${sentData.bearish}%</div>
+            <div>Neutral: ${sentData.neutral}%</div>
+            <div>Total Mentions: ${sentData.total_mentions}</div>
+          `;
+        } else {
+          sentimentContent.textContent = 'No sentiment data found.';
+        }
+      } catch (err) {
+        console.error('Error loading sentiment data:', err);
+        sentimentContent.textContent = 'Error loading sentiment data.';
+      }
+    }
+
+    // Load market news independently
+    async function loadMarketNews() {
+      try {
+        // Reset to skeleton loader state
+        newsContent.innerHTML = `
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+          <div style="margin-top: 15px;"></div>
+          <div class="skeleton skeleton-heading"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        `;
+        
+        // Fetch news
+        const { data: newsData, error: newsErr } = await getNews(currentSymbol, 3);
+        
+        if (newsErr) {
+          newsContent.textContent = `Error: ${newsErr}`;
+          return;
+        }
+        
+        if (newsData && newsData.length > 0) {
+          const html = newsData.map(n => `
+            <div style="margin-bottom:10px;">
+              <strong>${n.title}</strong><br/>
+              <em>${n.source} | ${new Date(n.published_at).toLocaleString()}</em><br/>
+              <small>${n.summary || ''}</small>
+            </div>
+          `).join('');
+          newsContent.innerHTML = html;
+        } else {
+          newsContent.textContent = 'No news found.';
+        }
+      } catch (err) {
+        console.error('Error loading news:', err);
+        newsContent.textContent = 'Error loading news.';
+      }
+    }
+
+    // Loading chart data
+    async function loadChartData() {
+      if (chartLoading) {
+        chartLoading.classList.remove('loaded');
+      }
+      
+      try {
+        const rawData = await getMarketData(currentSymbol, currentTimeframe);
+        
+        if (rawData.error) {
+          showToast('error', 'Data Error', `Failed to load market data: ${rawData.error}`);
+          return generateMockData();
+        }
+        
+        if (rawData && rawData.data && rawData.data.length > 0) {
+          updateLoadingProgress('connect', true);
+          return convertCandlestickData(rawData.data);
+        }
+        
+        // Fallback to mock data
+        updateLoadingProgress('connect', true);
+        return generateMockData();
+        
+      } catch (err) {
+        console.error('Error loading market data:', err);
+        showToast('warning', 'Data Warning', 'Using mock data due to connection issue');
+        updateLoadingProgress('connect', true);
+        return generateMockData();
+      }
+    }
+
+    // Generate fallback data
+    function generateMockData(count = 50) {
+      const data = [];
+      let price = 55000 + Math.random() * 5000;
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+      for (let i=0; i<count; i++) {
+        const change = (Math.random() - 0.5) * 2;
+        const open = price;
+        price = open + open * change * 0.02;
+        const high = Math.max(open, price) + Math.random() * Math.abs(price - open) * 0.5;
+        const low = Math.min(open, price) - Math.random() * Math.abs(price - open) * 0.5;
+        const close = price;
+        const volume = Math.floor(Math.random() * 100000) + 10000;
+        const timestamp = now - (count - i)*oneDay;
+        data.push({ timestamp, open, high, low, close, volume });
+      }
+      return data;
+    }
+
+    // Initialize watchlist
+    function initializeWatchlist() {
+      const watchlistItems = document.querySelectorAll('.stock-item');
+      watchlistItems.forEach(item => {
+        item.addEventListener('click', function() {
+          // Remove active class from all items
+          watchlistItems.forEach(i => i.classList.remove('active'));
+          
+          // Add active class to clicked item
+          this.classList.add('active');
+          
+          // Get symbol from clicked item
+          const symbol = this.querySelector('.stock-symbol').textContent;
+          
+          // Update current symbol and reload data
+          if (symbol !== currentSymbol) {
+            currentSymbol = symbol;
+            showToast('info', 'Symbol Changed', `Loading data for ${symbol}`);
+            
+            // Reload all data
+            loadChartData().then(data => {
+              if (chart) chart.setData(data);
+              loadAllPanels();
+            });
+          }
+        });
+      });
+    }
+
+    // Save user preferences and watchlist
+    function saveUserPreferences() {
+      // Get user preferences
+      const preferences = {
+        theme: 'dark', // Could be configurable
+        currentSymbol: currentSymbol,
+        currentTimeframe: currentTimeframe,
+        sidebarCollapsed: leftSidebar.classList.contains('collapsed'),
+        panelsCollapsed: rightPanels.classList.contains('collapsed')
+      };
+      
+      // Save to localStorage for non-logged in users
+      localStorage.setItem('moonai_preferences', JSON.stringify(preferences));
+      
+      // If user is logged in, could save to Supabase
+      if (supabaseClient?.auth?.user()) {
+        // Example of saving to user-specific table
+        // This would require a 'user_preferences' table in Supabase
+        supabaseClient
+          .from('user_preferences')
+          .upsert({
+            user_id: supabaseClient.auth.user().id,
+            preferences: preferences
+          })
+          .then(result => {
+            if (result.error) {
+              console.error('Error saving preferences:', result.error);
+            }
+          });
+      }
+      
+      showToast('success', 'Preferences Saved', 'Your settings have been saved');
+    }
+    
+    // Load user preferences
+    async function loadUserPreferences() {
+      let preferences = null;
+      
+      // Try loading from Supabase if logged in
+      if (supabaseClient?.auth?.user()) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('user_preferences')
+            .select('preferences')
+            .eq('user_id', supabaseClient.auth.user().id)
+            .single();
+            
+          if (!error && data) {
+            preferences = data.preferences;
+          }
+        } catch (err) {
+          console.error('Error loading preferences from Supabase:', err);
+        }
+      }
+      
+      // Fall back to localStorage if not found in Supabase
+      if (!preferences) {
+        const savedPrefs = localStorage.getItem('moonai_preferences');
+        if (savedPrefs) {
+          try {
+            preferences = JSON.parse(savedPrefs);
+          } catch (err) {
+            console.error('Error parsing saved preferences:', err);
+          }
+        }
+      }
+      
+      // Apply preferences if found
+      if (preferences) {
+        // Apply symbol and timeframe
+        if (preferences.currentSymbol) {
+          currentSymbol = preferences.currentSymbol;
+        }
+        
+        if (preferences.currentTimeframe) {
+          currentTimeframe = preferences.currentTimeframe;
+          // Update UI
+          timeframeButtons.forEach(btn => {
+            if (btn.getAttribute('data-timeframe') === currentTimeframe) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        }
+        
+        // Apply sidebar and panel states
+        if (preferences.sidebarCollapsed) {
+          leftSidebar.classList.add('collapsed');
+          sidebarToggle.classList.add('collapsed');
+          sidebarToggle.innerHTML = '<span>▶</span>';
+        }
+        
+        if (preferences.panelsCollapsed) {
+          rightPanels.classList.add('collapsed');
+          panelsToggle.classList.add('collapsed');
+          panelsToggle.innerHTML = '<span>◀</span>';
+        }
+      }
+    }
+    
+    // Set up real-time updates for chart
+    function setupRealTimeUpdates() {
+      // Unsubscribe from any existing subscription
+      if (window._marketDataSubscription) {
+        window._marketDataSubscription();
+        window._marketDataSubscription = null;
+      }
+      
+      // Set up new subscription
+      try {
+        window._marketDataSubscription = subscribeToMarketData(currentSymbol, (payload) => {
+          console.log('Real-time update received:', payload);
+          
+          // Process the update based on type
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newData = payload.new;
+            
+            if (!newData) return;
+            
+            // Convert to correct format
+            const candleData = {
+              timestamp: new Date(newData.timestamp).getTime(),
+              open: parseFloat(newData.open),
+              high: parseFloat(newData.high),
+              low: parseFloat(newData.low),
+              close: parseFloat(newData.close),
+              volume: parseInt(newData.volume, 10)
+            };
+            
+            // Check if this is an update to an existing candle or a new one
+            const existingIndex = chart.data.findIndex(d => 
+              d.timestamp === candleData.timestamp
+            );
+            
+            // Update UI based on whether this is new or updated data
+            if (existingIndex >= 0) {
+              // Update existing candle
+              chart.data[existingIndex] = candleData;
+              showToast('info', 'Data Updated', `${currentSymbol} candle updated`);
+            } else {
+              // Add new candle
+              chart.data.push(candleData);
+              showToast('info', 'New Data', `New ${currentSymbol} candle received`);
+              
+              // Sort data by timestamp to keep chronological order
+              chart.data.sort((a, b) => a.timestamp - b.timestamp);
+            }
+            
+            // Update chart
+            chart.minPrice = Math.min(...chart.data.map(d => d.low));
+            chart.maxPrice = Math.max(...chart.data.map(d => d.high));
+            chart.maxVolume = Math.max(...chart.data.map(d => d.volume));
+            chart.renderCandlesticks();
+            
+            // Also update AI predictions and sentiment if available
+            if (Math.random() > 0.7) { // Only occasionally refresh these
+              loadAIPredictions();
+              loadSocialSentiment();
+            }
+          }
+        });
+        
+        console.log(`Real-time updates enabled for ${currentSymbol}`);
+      } catch (err) {
+        console.error('Error setting up real-time updates:', err);
+      }
+    }
+    
+    // Enhance rendering with instancing for better performance
+    function setupInstancedRendering(chart) {
+      if (!chart || !chart.isReady || typeof THREE === 'undefined') return;
+      
+      try {
+        // Save original render method for fallback
+        const originalRender = chart.renderCandlesticks;
+        
+        // Create enhanced instanced rendering method
+        chart.renderCandlesticksInstanced = function() {
+          // Clear existing
+          while (this.candlesticks.children.length > 0) {
+            this.candlesticks.remove(this.candlesticks.children[0]);
+          }
+          while (this.volumeBars.children.length > 0) {
+            this.volumeBars.remove(this.volumeBars.children[0]);
+          }
+          
+          if (!this.data || this.data.length === 0) return;
+          
+          const priceRange = this.maxPrice - this.minPrice;
+          const scaleFactor = 20 / priceRange;
+          
+          // Create instanced candlestick bodies
+          const candleCount = this.data.length;
+          const bodyGeometry = new THREE.BoxGeometry(0.8, 1, 0.8);
+          const bullishMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00b894,
+            metalness: 0.2,
+            roughness: 0.5
+          });
+          const bearishMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff7675,
+            metalness: 0.2,
+            roughness: 0.5
+          });
+          
+          // Create instanced meshes for bull and bear candles
+          const bullishInstancedMesh = new THREE.InstancedMesh(
+            bodyGeometry,
+            bullishMaterial,
+            candleCount
+          );
+          const bearishInstancedMesh = new THREE.InstancedMesh(
+            bodyGeometry,
+            bearishMaterial,
+            candleCount
+          );
+          
+          // Set initial visibility to false (we'll only show the ones we need)
+          bullishInstancedMesh.count = 0;
+          bearishInstancedMesh.count = 0;
+          
+          // Track instance counts
+          let bullishCount = 0;
+          let bearishCount = 0;
+          
+          // Create transform matrix for each instance
+          const matrix = new THREE.Matrix4();
+          const position = new THREE.Vector3();
+          const quaternion = new THREE.Quaternion();
+          const scale = new THREE.Vector3(1, 1, 1);
+          
+          // Create line segments for wicks
+          const wickPositions = [];
+          const wickMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
+          
+          // Create volume bars data
+          const volumePositions = [];
+          const volumeColors = [];
+          
+          // Process each candle
+          this.data.forEach((candle, index) => {
+            const isBullish = candle.close >= candle.open;
+            const bodyHeight = Math.abs(candle.open - candle.close) * scaleFactor;
+            const bodyBottom = Math.min(candle.open, candle.close);
+            const bodyPosition = (bodyBottom - this.minPrice) * scaleFactor + bodyHeight / 2;
+            
+            // Position for this candle
+            position.set(index * 1.2, bodyPosition, 0);
+            
+            // Scale for this candle
+            scale.set(1, bodyHeight, 1);
+            
+            // Update the transform matrix
+            matrix.compose(position, quaternion, scale);
+            
+            // Apply the matrix to the correct instanced mesh
+            if (isBullish) {
+              bullishInstancedMesh.setMatrixAt(bullishCount, matrix);
+              bullishCount++;
+            } else {
+              bearishInstancedMesh.setMatrixAt(bearishCount, matrix);
+              bearishCount++;
+            }
+            
+            // Create wick vertices
+            const wickTop = (candle.high - this.minPrice) * scaleFactor;
+            const wickBottom = (candle.low - this.minPrice) * scaleFactor;
+            wickPositions.push(
+              index * 1.2, wickBottom, 0,
+              index * 1.2, wickTop, 0
+            );
+            
+            // Create volume bar data
+            const volumeHeight = (candle.volume / this.maxVolume) * 10;
+            volumePositions.push(
+              index * 1.2 - 0.35, 0, -3,
+              index * 1.2 + 0.35, 0, -3,
+              index * 1.2 + 0.35, volumeHeight, -3,
+              
+              index * 1.2 - 0.35, 0, -3,
+              index * 1.2 + 0.35, volumeHeight, -3,
+              index * 1.2 - 0.35, volumeHeight, -3
+            );
+            
+            // Color for volume bars
+            const color = isBullish ? 
+              new THREE.Color(0x00b894) : 
+              new THREE.Color(0xff7675);
+              
+            for (let i = 0; i < 6; i++) {
+              volumeColors.push(color.r, color.g, color.b);
+            }
+          });
+          
+          // Update instanced mesh counts
+          bullishInstancedMesh.count = bullishCount;
+          bearishInstancedMesh.count = bearishCount;
+          
+          // Update instance matrices
+          bullishInstancedMesh.instanceMatrix.needsUpdate = true;
+          bearishInstancedMesh.instanceMatrix.needsUpdate = true;
+          
+          // Add instanced meshes to scene
+          this.candlesticks.add(bullishInstancedMesh);
+          this.candlesticks.add(bearishInstancedMesh);
+          
+          // Create and add wicks
+          const wickGeometry = new THREE.BufferGeometry();
+          wickGeometry.setAttribute('position', new THREE.Float32BufferAttribute(wickPositions, 3));
+          const wicks = new THREE.LineSegments(wickGeometry, wickMaterial);
+          this.candlesticks.add(wicks);
+          
+          // Create and add volume bars
+          const volumeGeometry = new THREE.BufferGeometry();
+          volumeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(volumePositions, 3));
+          volumeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(volumeColors, 3));
+          const volumeMaterial = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.5
+          });
+          const volumeBars = new THREE.Mesh(volumeGeometry, volumeMaterial);
+          this.volumeBars.add(volumeBars);
+          
+          // Position the groups
+          this.candlesticks.position.x = -this.data.length * 0.6;
+          this.volumeBars.position.x = -this.data.length * 0.6;
+        };
+        
+        // Try to use instanced rendering, fall back to original if it fails
+        try {
+          chart.renderCandlesticks = chart.renderCandlesticksInstanced;
+          console.log('Using instanced rendering for better performance');
+        } catch (renderError) {
+          console.error('Error setting up instanced rendering, using fallback:', renderError);
+          chart.renderCandlesticks = originalRender;
+        }
+      } catch (err) {
+        console.error('Error setting up instanced rendering:', err);
+      }
+    }
+
+    // Initialize Voice Assistant
+    function initializeVoiceAssistant() {
+      const voiceAssistantIcon = document.getElementById('voice-assistant-icon');
+      const voiceAssistantPanel = document.getElementById('voice-assistant-panel');
+      const voicePanelClose = document.getElementById('voice-panel-close');
+      const voiceInput = document.getElementById('voice-input');
+      const voiceMicButton = document.getElementById('voice-mic-button');
+      const voicePanelContent = document.getElementById('voice-panel-content');
+      
+      // Show/hide panel when clicking the icon
+      voiceAssistantIcon.addEventListener('click', () => {
+        voiceAssistantPanel.classList.toggle('active');
+      });
+      
+      // Close the panel
+      voicePanelClose.addEventListener('click', () => {
+        voiceAssistantPanel.classList.remove('active');
+      });
+      
+      // Handle text input
+      voiceInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const message = voiceInput.value.trim();
+          if (message) {
+            addMessageToChat('user', message);
+            voiceInput.value = '';
+            
+            // Process the command
+            processVoiceCommand(message);
+          }
+        }
+      });
+      
+      // Handle microphone button
+      voiceMicButton.addEventListener('click', () => {
+        if (speechRecognition) {
+          try {
+            // Show recording indicator
+            voiceMicButton.style.backgroundColor = '#ff7675';
+            
+            // Start listening
+            speechRecognition.start();
+            
+            // Handle the result
+            speechRecognition.onresult = (event) => {
+              const transcript = event.results[0][0].transcript;
+              addMessageToChat('user', transcript);
+              
+              // Process the command
+              processVoiceCommand(transcript);
+            };
+            
+            // Reset on end
+            speechRecognition.onend = () => {
+              voiceMicButton.style.backgroundColor = '';
+            };
+            
+            // Handle errors
+            speechRecognition.onerror = (event) => {
+              console.error('Speech recognition error:', event.error);
+              voiceMicButton.style.backgroundColor = '';
+              addMessageToChat('assistant', 'Sorry, I couldn\'t understand that. Please try again.');
+            };
+            
+          } catch (err) {
+            console.error('Error starting speech recognition:', err);
+            voiceMicButton.style.backgroundColor = '';
+            addMessageToChat('assistant', 'Sorry, speech recognition failed. Please type your request instead.');
+          }
+        } else {
+          addMessageToChat('assistant', 'Sorry, speech recognition is not supported in your browser.');
+        }
+      });
+      
+      // Add message to the chat
+      function addMessageToChat(type, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = type === 'user' ? 'user-message' : 'assistant-message';
+        messageDiv.textContent = text;
+        
+        voicePanelContent.appendChild(messageDiv);
+        voicePanelContent.scrollTop = voicePanelContent.scrollHeight;
+        
+        // If it's an assistant message, also speak it if speech synthesis is available
+        if (type === 'assistant' && speechSynthesis) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 1.0;
+          utterance.pitch = 1.0;
+          speechSynthesis.speak(utterance);
+        }
+      }
+      
+      // Process voice commands
+      function processVoiceCommand(command) {
+        command = command.toLowerCase();
+        
+        // Handle lens commands
+        if (command.includes('gravitational lens') || command.includes('gravity lens')) {
+          if (command.includes('on') || command.includes('enable') || command.includes('activate')) {
+            if (chart) {
+              chart.setLensActive(true);
+              addMessageToChat('assistant', 'Gravitational lens effect activated.');
+            }
+          } else if (command.includes('off') || command.includes('disable') || command.includes('deactivate')) {
+            if (chart) {
+              chart.setLensActive(false);
+              addMessageToChat('assistant', 'Gravitational lens effect deactivated.');
+            }
+          } else {
+            if (chart) {
+              chart.setLensActive(!chart.lensActive);
+              addMessageToChat('assistant', `Gravitational lens effect ${chart.lensActive ? 'activated' : 'deactivated'}.`);
+            }
+          }
+          return;
+        }
+        
+        // Handle time-warp commands
+        if (command.includes('time warp') || command.includes('timewarp') || command.includes('rewind') || command.includes('replay')) {
+          if (chart) {
+            chart.timeWarpReplay();
+            addMessageToChat('assistant', 'Initiating time-warp visualization.');
+          }
+          return;
+        }
+        
+        // Handle VR commands
+        if (command.includes('vr') || command.includes('virtual reality')) {
+          if (chart) {
+            chart.enableVRMode();
+            addMessageToChat('assistant', 'Entering virtual reality mode.');
+          }
+          return;
+        }
+        
+        // Handle symbol change commands
+        if (command.includes('show') || command.includes('load') || command.includes('display')) {
+          const symbols = ['aapl', 'msft', 'tsla', 'nvda', 'amzn', 'googl'];
+          
+          for (const symbol of symbols) {
+            if (command.includes(symbol)) {
+              // Update current symbol and reload data
+              if (symbol.toUpperCase() !== currentSymbol) {
+                currentSymbol = symbol.toUpperCase();
+                addMessageToChat('assistant', `Loading data for ${currentSymbol}.`);
+                
+                // Update active class in the watchlist
+                const watchlistItems = document.querySelectorAll('.stock-item');
+                watchlistItems.forEach(item => {
+                  const itemSymbol = item.querySelector('.stock-symbol').textContent;
+                  if (itemSymbol === currentSymbol) {
+                    item.classList.add('active');
+                  } else {
+                    item.classList.remove('active');
+                  }
+                });
+                
+                // Reload data
+                loadChartData().then(data => {
+                  if (chart) chart.setData(data);
+                  loadAllPanels();
+                });
+              } else {
+                addMessageToChat('assistant', `Already displaying ${currentSymbol}.`);
+              }
+              return;
+            }
+          }
+        }
+        
+        // Handle timeframe change commands
+        if (command.includes('timeframe') || command.includes('time frame') || command.includes('interval')) {
+          const timeframes = {
+            'one day': '1d',
+            'day': '1d',
+            'week': '1w',
+            'one week': '1w',
+            'month': '1m',
+            'one month': '1m',
+            'three months': '3m',
+            'three month': '3m',
+            'year': '1y',
+            'one year': '1y',
+            'all': 'all',
+            'all time': 'all'
+          };
+          
+          for (const [key, value] of Object.entries(timeframes)) {
+            if (command.includes(key)) {
+              if (value !== currentTimeframe) {
+                currentTimeframe = value;
+                addMessageToChat('assistant', `Changing timeframe to ${key}.`);
+                
+                // Update active class in the timeframe buttons
+                const timeframeButtons = document.querySelectorAll('.timeframe-button');
+                timeframeButtons.forEach(btn => {
+                  if (btn.getAttribute('data-timeframe') === currentTimeframe) {
+                    btn.classList.add('active');
+                  } else {
+                    btn.classList.remove('active');
+                  }
+                });
+                
+                // Reload data with new timeframe
+                loadChartData().then(data => {
+                  if (chart) chart.setData(data);
+                });
+              } else {
+                addMessageToChat('assistant', `Already showing ${key} timeframe.`);
+              }
+              return;
+            }
+          }
+        }
+        
+        // Handle generic or unrecognized commands
+        addMessageToChat('assistant', 'You can ask me to:\n- Change symbols (e.g., "Show AAPL")\n- Change timeframes (e.g., "Set timeframe to 1 week")\n- Toggle features (e.g., "Activate gravitational lens")\n- Start time-warp or VR mode');
+      }
+    }
+    
+    // Initialize Custom Indicators Editor
+    function initializeCustomIndicators() {
+      const indicatorModal = document.getElementById('custom-indicator-modal');
+      const indicatorClose = document.getElementById('indicator-modal-close');
+      const indicatorCancel = document.getElementById('indicator-cancel');
+      const indicatorSave = document.getElementById('indicator-save');
+      
+      // Create an "Add Custom Indicator" button in the toolbar
+      const toolbarGroup = document.querySelector('.toolbar-group:last-child');
+      const indicatorBtn = document.createElement('button');
+      indicatorBtn.className = 'control-button';
+      indicatorBtn.id = 'custom-indicator-btn';
+      indicatorBtn.textContent = 'Custom';
+      indicatorBtn.setAttribute('data-tooltip', 'Create and manage custom indicators');
+      toolbarGroup.appendChild(indicatorBtn);
+      
+      // Show the modal when clicking the button
+      indicatorBtn.addEventListener('click', () => {
+        indicatorModal.classList.add('visible');
+      });
+      
+      // Close the modal
+      indicatorClose.addEventListener('click', () => {
+        indicatorModal.classList.remove('visible');
+      });
+      
+      indicatorCancel.addEventListener('click', () => {
+        indicatorModal.classList.remove('visible');
+      });
+      
+      // Handle save button
+      indicatorSave.addEventListener('click', () => {
+        const name = document.getElementById('indicator-name').value.trim();
+        const script = document.getElementById('indicator-script').value.trim();
+        const color = document.getElementById('indicator-color').value;
+        const width = document.getElementById('indicator-width').value;
+        const style = document.getElementById('indicator-style').value;
+        
+        // Validate inputs
+        if (!name || !script) {
+          showToast('error', 'Validation Error', 'Name and script are required');
+          return;
+        }
+        
+        // Create a custom indicator object
+        const indicator = {
+          name,
+          script,
+          settings: {
+            color,
+            width: parseInt(width, 10),
+            style
+          },
+          active: true
+        };
+        
+        // Save indicator (in real app, would save to database)
+        saveCustomIndicator(indicator);
+        
+        // Close modal
+        indicatorModal.classList.remove('visible');
+        
+        // Show success message
+        showToast('success', 'Indicator Saved', `Custom indicator "${name}" has been saved`);
+      });
+      
+      // Function to save a custom indicator
+      function saveCustomIndicator(indicator) {
+        // In a real app, would save to Supabase or localStorage
+        // For now, we'll just add it to a global array
+        
+        // Initialize the array if it doesn't exist
+        if (!window.customIndicators) {
+          window.customIndicators = [];
+        }
+        
+        // Check if indicator already exists (update it) or add new
+        const existingIndex = window.customIndicators.findIndex(i => i.name === indicator.name);
+        if (existingIndex >= 0) {
+          window.customIndicators[existingIndex] = indicator;
+        } else {
+          window.customIndicators.push(indicator);
+        }
+        
+        // In a real app, also implement applying the indicator to the chart
+        console.log('Custom indicators:', window.customIndicators);
+        
+        // Try to apply the indicator to the chart if it's active
+        if (indicator.active && chart) {
+          try {
+            // Create a function from the script
+            const indicatorFn = new Function('data', script);
+            
+            // Apply to chart data (placeholder - real implementation would be more complex)
+            const result = indicatorFn(chart.data);
+            console.log('Indicator result:', result);
+            
+            // Example: Show the indicator in the chart (real implementation would be more specific)
+            showToast('info', 'Indicator Applied', `Applied "${name}" to the chart`);
+          } catch (error) {
+            console.error('Error applying indicator:', error);
+            showToast('error', 'Script Error', `Error in indicator script: ${error.message}`);
+          }
+        }
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      const container = document.getElementById('chart-container');
+      try {
+        // Create chart
+        chart = new CandlestickChart(container);
+        
+        // Initialize watchlist
+        initializeWatchlist();
+        
+        // Mark first task as complete
+        updateLoadingProgress('initialize', true);
+        
+        // Load user preferences
+        await loadUserPreferences();
+        
+        // Set up performance enhancements
+        setTimeout(() => setupInstancedRendering(chart), 1000);
+        
+        // Load data
+        const marketData = await loadChartData();
+        chart.setData(marketData);
+        
+        // Set up real-time updates
+        setupRealTimeUpdates();
+        
+        // Load panels asynchronously
+        loadAllPanels();
+        
+        // Initialize voice assistant
+        initializeVoiceAssistant();
+        
+        // Initialize custom indicators
+        initializeCustomIndicators();
+        
+        // Check if user is logged in
+        onAuthStateChange((event, session) => {
+          updateUserInterface(!!session);
+          // Reload preferences if user logs in/out
+          loadUserPreferences();
+        });
+        
+        // Press 'v' to toggle chart view
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'v') {
+            chart.toggleView();
+          } else if (e.key === 's') {
+            // Save preferences with 's' key
+            saveUserPreferences();
+          }
+        });
+        
+        // Add save button to header
+        const userControls = document.querySelector('.user-controls');
+        const saveButton = document.createElement('button');
+        saveButton.className = 'platform-button secondary';
+        saveButton.textContent = 'Save Settings';
+        saveButton.addEventListener('click', saveUserPreferences);
+        userControls.appendChild(saveButton);
+        
+      } catch (error) {
+        console.error('Error initializing:', error);
+        showToast('error', 'Initialization Error', error.message);
+        
+        // Still mark progress as complete to hide the loading screen
+        updateLoadingProgress('initialize', true);
+        updateLoadingProgress('connect', true);
+        updateLoadingProgress('ai', true);
+        updateLoadingProgress('chart', true);
+      }
+    });
+  </script>
+</body>
+</html>
