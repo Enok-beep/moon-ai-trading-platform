@@ -32,6 +32,7 @@ import { signalsController } from './controllers/SignalsController.js';
 import { widgetbarController } from './controllers/WidgetbarController.js';
 import { watchlistController } from './controllers/WatchlistController.js';
 import { TimeframeController } from './controllers/TimeframeController.js';
+import { SearchController } from './controllers/SearchController.js';
 
 // Core Infrastructure
 import { logger } from './core/Logger.js';
@@ -80,6 +81,7 @@ class MoonAITradingPlatform {
     this.widgetbarController = widgetbarController;
     this.watchlistController = watchlistController;
     this.timeframeController = null; // Instantiated in init() after dataService
+    this.searchController = null; // Instantiated in init() after dataService
 
     // Trade execution
     this.tradeExecutor = null;
@@ -122,6 +124,9 @@ class MoonAITradingPlatform {
 
       // 3b. Initialize timeframe controller (NEW - Week 1 Quick Win)
       this.timeframeController = new TimeframeController(this.dataService, this.chartManager);
+
+      // 3c. Initialize search controller (NEW - Week 1 Quick Win)
+      this.searchController = new SearchController(this.dataService, this);
 
       // 4. Setup signal queue processor (pass dependencies)
       this._setupSignalProcessor();
@@ -362,6 +367,20 @@ class MoonAITradingPlatform {
       logger.error('Timeframe controller failed', { error: error.message });
     }
 
+    // Search controller (NEW - Week 1 Quick Win)
+    let searchInitialized = false;
+    try {
+      console.log('  8. Initializing searchController...');
+      searchInitialized = this.searchController.init();
+      console.log('  ✓ searchController initialized:', searchInitialized);
+      if (searchInitialized) {
+        logger.info('Search controller initialized - search bar now functional');
+      }
+    } catch (error) {
+      console.error('  ✗ searchController FAILED:', error.message);
+      logger.error('Search controller failed', { error: error.message });
+    }
+
     // Setup risk service
     try {
       this.riskService.setPortfolioValue(124847.50);
@@ -493,6 +512,31 @@ class MoonAITradingPlatform {
       // Update chart
       this.chartManager.setData(rawData, transformedData);
 
+      // Restart WebSocket stream for the new symbol
+      this.dataService.restartLiveStream(
+        symbol,
+        interval,
+        'bybit',
+        (candle) => {
+          // Real-time candle callback - update chart
+          if (this.chartManager.chart2d) {
+            const transformedCandle = {
+              time: Math.floor(candle.timestamp / 1000),
+              open: candle.open,
+              high: candle.high,
+              low: candle.low,
+              close: candle.close
+            };
+            this.chartManager.chart2d.update(transformedCandle);
+            logger.debug('Live candle update', {
+              symbol,
+              interval,
+              close: candle.close
+            });
+          }
+        }
+      );
+
       // Update indicator service
       this.indicatorService.setData(rawData);
 
@@ -541,6 +585,29 @@ class MoonAITradingPlatform {
         domRefs.viewToggleBtn.textContent = newView === '3d' ? 'Switch to 2D' : 'Switch to 3D';
         toast.info(`Switched to ${newView.toUpperCase()} view`);
       });
+    }
+
+    // Chart type buttons (NEW - Week 1 Quick Win)
+    const chartTypeButtons = document.querySelectorAll('.chart-type-btn');
+    if (chartTypeButtons.length > 0) {
+      chartTypeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const chartType = btn.dataset.type;
+
+          if (this.chartManager.chart2d) {
+            // Update button active states
+            chartTypeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Change chart type
+            this.chartManager.chart2d.setChartType(chartType);
+
+            logger.info('Chart type changed', { type: chartType });
+            toast.info(`Chart type: ${chartType}`);
+          }
+        });
+      });
+      logger.info('Chart type buttons initialized', { count: chartTypeButtons.length });
     }
 
     // Context menu for 2D chart
