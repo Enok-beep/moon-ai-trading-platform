@@ -1,0 +1,34 @@
+//@version=5
+indicator("TD Sequential Test", overlay=true)
+
+// TD Sequential Settings
+lookback = input.int(4, "Lookback Period")
+setupCount = input.int(9, "Setup Count")
+
+// Calculate TD Setup
+var int buySetup = 0
+var int sellSetup = 0
+
+if close < close[lookback]
+    buySetup := buySetup + 1
+    sellSetup := 0
+else if close > close[lookback]
+    sellSetup := sellSetup + 1
+    buySetup := 0
+else
+    buySetup := 0
+    sellSetup := 0
+
+// Signals
+buySignal = buySetup >= setupCount
+sellSignal = sellSetup >= setupCount
+
+// Plot
+plotshape(buySignal, style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small)
+plotshape(sellSignal, style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small)
+
+// Reset on signal
+if buySignal
+    buySetup := 0
+if sellSignal
+    sellSetup := 0

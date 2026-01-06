@@ -1,0 +1,357 @@
+/**
+ * Design Tokens - Unified Design System
+ * Single source of truth for all styling
+ * Moon AI Trading Platform v7.0
+ */
+
+:root {
+  /* ============================================
+   * COLOR PALETTE
+   * ============================================ */
+
+  /* Primary Brand Colors */
+  --color-primary: #2962ff;
+  --color-primary-hover: #1e53e4;
+  --color-primary-active: #1848c9;
+  --color-primary-light: rgba(41, 98, 255, 0.2);
+  --color-primary-lighter: rgba(41, 98, 255, 0.1);
+
+  /* Secondary Colors */
+  --color-secondary: #6c5ce7;
+  --color-secondary-hover: #5849c2;
+  --color-secondary-light: rgba(108, 92, 231, 0.2);
+
+  /* Accent Colors */
+  --color-accent: #00cec9;
+  --color-accent-hover: #00b5b0;
+  --color-accent-light: rgba(0, 206, 201, 0.2);
+
+  /* Semantic Colors */
+  --color-success: #26a69a;
+  --color-success-hover: #1e8e84;
+  --color-success-bg: rgba(38, 166, 154, 0.12);
+  --color-success-text: #00c853;
+
+  --color-danger: #ef5350;
+  --color-danger-hover: #e53935;
+  --color-danger-bg: rgba(239, 83, 80, 0.12);
+  --color-danger-text: #ff5252;
+
+  --color-warning: #ff9800;
+  --color-warning-hover: #f57c00;
+  --color-warning-bg: rgba(255, 152, 0, 0.12);
+  --color-warning-text: #ffb74d;
+
+  --color-info: #2196f3;
+  --color-info-hover: #1e88e5;
+  --color-info-bg: rgba(33, 150, 243, 0.12);
+
+  /* Link Colors (for color-coded linking) */
+  --color-link-blue: #2962ff;
+  --color-link-green: #26a69a;
+  --color-link-orange: #ff9800;
+  --color-link-purple: #6c5ce7;
+  --color-link-master: #ffffff;
+  --color-link-none: #5a5a6a;
+
+  /* Background Colors */
+  --color-bg: #131722;
+  --color-bg-secondary: #1e222d;
+  --color-bg-tertiary: #252a37;
+
+  --color-surface: #1e222d;
+  --color-surface-hover: #2a2e39;
+  --color-surface-active: #363a45;
+  --color-surface-elevated: #262b36;
+
+  /* Panel & Card Colors */
+  --color-panel: rgba(19, 23, 34, 0.95);
+  --color-card: #1e222d;
+  --color-card-hover: #262b36;
+  --color-glass: rgba(19, 23, 34, 0.92);
+
+  /* Text Colors */
+  --color-text: rgba(255, 255, 255, 0.9);
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-muted: rgba(255, 255, 255, 0.4);
+  --color-text-disabled: rgba(255, 255, 255, 0.2);
+  --color-text-inverse: #131722;
+
+  /* Border Colors */
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-border-active: rgba(255, 255, 255, 0.18);
+  --color-divider: rgba(255, 255, 255, 0.04);
+
+  /* Overlay Colors */
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-overlay-dark: rgba(0, 0, 0, 0.7);
+  --color-glow: rgba(255, 255, 255, 0.08);
+
+  /* ============================================
+   * TYPOGRAPHY
+   * ============================================ */
+
+  /* Font Families */
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Courier New', monospace;
+  --font-family-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+
+  /* Font Sizes - Using modular scale (1.125 ratio) */
+  --font-2xs: 10px;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 13px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 20px;
+  --font-3xl: 24px;
+  --font-4xl: 28px;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+
+  /* ============================================
+   * SPACING (4px grid)
+   * ============================================ */
+
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ============================================
+   * SIZING
+   * ============================================ */
+
+  /* Component Sizes */
+  --size-icon-sm: 16px;
+  --size-icon-md: 20px;
+  --size-icon-lg: 24px;
+  --size-icon-xl: 32px;
+
+  --size-btn-sm: 28px;
+  --size-btn-md: 36px;
+  --size-btn-lg: 44px;
+
+  --size-input-sm: 28px;
+  --size-input-md: 36px;
+  --size-input-lg: 44px;
+
+  /* Layout Sizes */
+  --size-header: 48px;
+  --size-toolbar: 40px;
+  --size-statusbar: 24px;
+  --size-widgetbar: 44px;
+  --size-panel-header: 36px;
+
+  --size-panel-left: 272px;
+  --size-panel-right: 320px;
+  --size-panel-min: 200px;
+  --size-panel-max: 500px;
+
+  /* ============================================
+   * BORDER RADIUS
+   * ============================================ */
+
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* ============================================
+   * SHADOWS
+   * ============================================ */
+
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-tooltip: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  /* Glow Effects */
+  --shadow-glow-primary: 0 0 20px rgba(41, 98, 255, 0.3);
+  --shadow-glow-success: 0 0 20px rgba(38, 166, 154, 0.3);
+  --shadow-glow-danger: 0 0 20px rgba(239, 83, 80, 0.3);
+
+  /* ============================================
+   * TRANSITIONS & ANIMATIONS
+   * ============================================ */
+
+  /* Timing Functions */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-medium: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+
+  /* Common Transitions */
+  --transition-fast: all 100ms var(--ease-smooth);
+  --transition-normal: all 150ms var(--ease-smooth);
+  --transition-medium: all 250ms var(--ease-smooth);
+  --transition-slow: all 350ms var(--ease-smooth);
+  --transition-colors: background-color 150ms var(--ease-smooth), color 150ms var(--ease-smooth), border-color 150ms var(--ease-smooth);
+  --transition-transform: transform 250ms var(--ease-smooth);
+  --transition-opacity: opacity 150ms var(--ease-smooth);
+
+  /* ============================================
+   * Z-INDEX LAYERS
+   * ============================================ */
+
+  --z-base: 1;
+  --z-above: 10;
+  --z-panel: 100;
+  --z-header: 200;
+  --z-dropdown: 300;
+  --z-sticky: 400;
+  --z-overlay: 500;
+  --z-modal: 600;
+  --z-popover: 700;
+  --z-tooltip: 800;
+  --z-toast: 900;
+  --z-max: 9999;
+
+  /* ============================================
+   * BREAKPOINTS (for reference in JS)
+   * ============================================ */
+
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ============================================
+ * UTILITY CLASSES
+ * ============================================ */
+
+/* Text Colors */
+.text-primary { color: var(--color-text) !important; }
+.text-secondary { color: var(--color-text-secondary) !important; }
+.text-muted { color: var(--color-text-muted) !important; }
+.text-success { color: var(--color-success-text) !important; }
+.text-danger { color: var(--color-danger-text) !important; }
+.text-warning { color: var(--color-warning-text) !important; }
+
+/* Background Colors */
+.bg-surface { background: var(--color-surface) !important; }
+.bg-elevated { background: var(--color-surface-elevated) !important; }
+.bg-success { background: var(--color-success-bg) !important; }
+.bg-danger { background: var(--color-danger-bg) !important; }
+.bg-warning { background: var(--color-warning-bg) !important; }
+
+/* Link Colors (for color-coded linking) */
+.link-color-blue { --link-color: var(--color-link-blue); }
+.link-color-green { --link-color: var(--color-link-green); }
+.link-color-orange { --link-color: var(--color-link-orange); }
+.link-color-purple { --link-color: var(--color-link-purple); }
+.link-color-master { --link-color: var(--color-link-master); }
+.link-color-none { --link-color: var(--color-link-none); }
+
+/* Transitions */
+.transition-none { transition: none !important; }
+.transition-fast { transition: var(--transition-fast) !important; }
+.transition-normal { transition: var(--transition-normal) !important; }
+.transition-medium { transition: var(--transition-medium) !important; }
+.transition-slow { transition: var(--transition-slow) !important; }
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-out-right {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Animation Classes */
+.animate-fade-in { animation: fade-in var(--duration-medium) var(--ease-smooth); }
+.animate-slide-in-right { animation: slide-in-right var(--duration-medium) var(--ease-smooth); }
+.animate-slide-in-left { animation: slide-in-left var(--duration-medium) var(--ease-smooth); }
+.animate-slide-up { animation: slide-up var(--duration-medium) var(--ease-smooth); }
+.animate-scale-in { animation: scale-in var(--duration-medium) var(--ease-smooth); }
+.animate-pulse { animation: pulse 2s var(--ease-smooth) infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-bounce { animation: bounce 1s var(--ease-bounce) infinite; }

@@ -14,8 +14,10 @@ const PORT = 3001;
 const MIME_TYPES = {
   '.html': 'text/html',
   '.js': 'text/javascript',
+  '.mjs': 'text/javascript',
   '.css': 'text/css',
   '.json': 'application/json',
+  '.csv': 'text/csv',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.gif': 'image/gif',

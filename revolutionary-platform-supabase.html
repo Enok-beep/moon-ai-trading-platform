@@ -16,28 +16,73 @@
     rel="stylesheet"
   />
 
-  <!-- Basic Styles -->
+  <!-- Design Tokens - Unified Theme System v7.0 -->
+  <link rel="stylesheet" href="src/styles/design-tokens.css"/>
+  <!-- TradingView Atomic CSS System v6.5 -->
+  <link rel="stylesheet" href="src/styles/tradingview-atomic.css"/>
+
+  <!-- Enterprise Styles v5.0 - Webull Killer -->
   <style>
     :root {
+      /* === CORE COLORS === */
       --primary-color: #6c5ce7;
       --primary-light: #a29bfe;
+      --primary-dark: #5849c2;
       --secondary-color: #00cec9;
       --accent-color: #fd79a8;
-      --background-color: #0f0f1a;
-      --card-background: #1a1a2e;
-      --panel-background: #16213e;
-      --text-color: #e0e0e0;
-      --text-secondary: #a0a0a0;
-      --border-color: #2d3748;
-      --header-height: 60px;
-      --sidebar-width: 260px;
+      --background-color: #0a0a12;
+      --card-background: #12121e;
+      --panel-background: #0f0f1a;
+      --text-color: #e8e8f0;
+      --text-secondary: #8b8b9a;
+      --text-muted: #5a5a6a;
+      --border-color: #1e1e2d;
+      --border-light: #2d2d3d;
+
+      /* === LAYOUT DIMENSIONS === */
+      --header-height: 52px;
+      --sidebar-width: 240px;
       --right-panel-width: 320px;
-      --success: #00b894;
-      --warning: #fdcb6e;
-      --danger: #ff7675;
-      --chart-bull: #00b894;
-      --chart-bear: #ff7675;
-      --grid-color: rgba(255, 255, 255, 0.07);
+      --widgetbar-width: 44px;
+      --execution-bar-height: 64px;
+
+      /* === TRADING COLORS === */
+      --success: #00d26a;
+      --success-light: rgba(0, 210, 106, 0.15);
+      --success-glow: rgba(0, 210, 106, 0.4);
+      --warning: #ffb74d;
+      --warning-light: rgba(255, 183, 77, 0.15);
+      --danger: #ff5252;
+      --danger-light: rgba(255, 82, 82, 0.15);
+      --danger-glow: rgba(255, 82, 82, 0.4);
+      --chart-bull: #00d26a;
+      --chart-bear: #ff5252;
+      --grid-color: rgba(255, 255, 255, 0.04);
+
+      /* === SIGNAL GRADES === */
+      --grade-a-plus: #ff4757;
+      --grade-a-plus-glow: 0 0 20px rgba(255, 71, 87, 0.6);
+      --grade-a: #ffd700;
+      --grade-a-glow: 0 0 20px rgba(255, 215, 0, 0.5);
+      --grade-b: #3498db;
+      --grade-b-glow: 0 0 15px rgba(52, 152, 219, 0.4);
+      --grade-c: #95a5a6;
+
+      /* === GLASSMORPHISM === */
+      --glass-bg: rgba(18, 18, 30, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(12px);
+
+      /* === TRANSITIONS === */
+      --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+      /* === SHADOWS === */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 30px rgba(108, 92, 231, 0.3);
     }
 
     * {
@@ -155,47 +200,466 @@
       cursor: pointer;
     }
 
+    /* === ENTERPRISE CSS GRID LAYOUT === */
     .platform-container {
-      display: flex;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr var(--right-panel-width);
+      grid-template-rows: 1fr var(--execution-bar-height);
+      grid-template-areas:
+        "sidebar chart panels"
+        "execution execution execution";
       height: calc(100vh - var(--header-height));
       margin-top: var(--header-height);
+      gap: 0;
+      transition: var(--transition-smooth);
+      background: var(--background-color);
     }
 
-    /* Left Sidebar (Watchlist) */
+    /* Sidebar collapsed state - chart expands magnetically */
+    .platform-container.sidebar-collapsed {
+      grid-template-columns: 0 1fr var(--right-panel-width);
+    }
+
+    /* Panels collapsed state */
+    .platform-container.panels-collapsed {
+      grid-template-columns: var(--sidebar-width) 1fr 0;
+    }
+
+    /* Both collapsed - 100% chart */
+    .platform-container.sidebar-collapsed.panels-collapsed {
+      grid-template-columns: 0 1fr 0;
+    }
+
+    /* === LEFT SIDEBAR (Watchlist) === */
     .left-sidebar {
-      width: var(--sidebar-width);
-      background-color: var(--card-background);
+      grid-area: sidebar;
+      background: var(--card-background);
       border-right: 1px solid var(--border-color);
       overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
-      transition: transform 0.3s ease;
+      transition: var(--transition-smooth);
+      will-change: width;
     }
 
-    .left-sidebar.collapsed {
-      transform: translateX(-100%);
+    .platform-container.sidebar-collapsed .left-sidebar {
+      width: 0;
+      min-width: 0;
+      border-right: none;
+      overflow: hidden;
     }
 
     .sidebar-toggle {
-      position: absolute;
-      top: calc(var(--header-height) + 10px);
-      left: calc(var(--sidebar-width) + 10px);
-      z-index: 10;
+      position: fixed;
+      top: calc(var(--header-height) + 12px);
+      left: calc(var(--sidebar-width) - 12px);
+      z-index: 101;
       width: 24px;
       height: 24px;
-      background-color: var(--card-background);
-      border: 1px solid var(--border-color);
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 12px;
-      transition: left 0.3s ease;
+      font-size: 10px;
+      color: var(--text-secondary);
+      transition: var(--transition-smooth);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.1);
     }
 
     .sidebar-toggle.collapsed {
-      left: 10px;
+      left: 12px;
+    }
+
+    /* Watchlist Header */
+    .watchlist-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--panel-background);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .watchlist-header h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    /* === MAIN CHART AREA === */
+    .chart-area {
+      grid-area: chart;
+      position: relative;
+      background: var(--background-color);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* === RIGHT PANELS === */
+    .right-panels {
+      grid-area: panels;
+      background: var(--card-background);
+      border-left: 1px solid var(--border-color);
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-right: var(--widgetbar-width); /* Account for widgetbar */
+      transition: var(--transition-smooth);
+      will-change: width;
+    }
+
+    .platform-container.panels-collapsed .right-panels,
+    .platform-container.right-panel-collapsed .right-panels {
+      width: 0;
+      min-width: 0;
+      border-left: none;
+      overflow: hidden;
+      margin-right: var(--widgetbar-width);
+    }
+
+    /* Grid layout when right panel is collapsed */
+    .platform-container.right-panel-collapsed {
+      grid-template-columns: var(--sidebar-width) 1fr 0;
+    }
+
+    .platform-container.right-panel-collapsed main,
+    .platform-container.right-panel-collapsed .chart-area {
+      margin-right: var(--widgetbar-width);
+    }
+
+    /* === WIDGETBAR HIDER (TradingView-Style Panel Toggle) === */
+    .panels-toggle.widgetbar-hider {
+      position: fixed;
+      right: calc(var(--right-panel-width) + var(--widgetbar-width) - 4px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 150;
+      cursor: pointer;
+      transition: right 0.25s ease, transform 0.15s ease;
+      width: auto;
+      height: auto;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .panels-toggle.widgetbar-hider .hider-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panels-toggle.widgetbar-hider .hider-svg {
+      display: block;
+    }
+
+    .panels-toggle.widgetbar-hider .background-pill {
+      fill: var(--border-color);
+      stroke: var(--border-color);
+      stroke-width: 1;
+      transition: fill 0.15s ease, stroke 0.15s ease;
+    }
+
+    .panels-toggle.widgetbar-hider .arrow-icon {
+      stroke: var(--text-secondary);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.15s ease, transform 0.25s ease;
+    }
+
+    .panels-toggle.widgetbar-hider:hover .background-pill {
+      fill: var(--primary-color);
+      stroke: var(--primary-color);
+    }
+
+    .panels-toggle.widgetbar-hider:hover .arrow-icon {
+      stroke: white;
+    }
+
+    /* Collapsed state - panel hidden, arrow points left (show panel) */
+    .panels-toggle.widgetbar-hider.collapsed {
+      right: calc(var(--widgetbar-width) - 4px);
+    }
+
+    .panels-toggle.widgetbar-hider.collapsed .hider-svg {
+      transform: scaleX(-1);
+    }
+
+    /* Tooltip for widgetbar hider */
+    .panels-toggle.widgetbar-hider .tv-tooltip {
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-right: 8px;
+      background: var(--tooltip-bg, #1e222d);
+      color: var(--tooltip-text, #d1d4dc);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .panels-toggle.widgetbar-hider:hover .tv-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Legacy panels-toggle fallback (hidden when widgetbar-hider is used) */
+    .panels-toggle:not(.widgetbar-hider) {
+      position: fixed;
+      top: calc(var(--header-height) + 12px);
+      right: calc(var(--right-panel-width) - 12px);
+      z-index: 101;
+      width: 24px;
+      height: 24px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      color: var(--text-secondary);
+      transition: var(--transition-smooth);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panels-toggle:not(.widgetbar-hider):hover {
+      background: var(--primary-color);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .panels-toggle:not(.widgetbar-hider).collapsed {
+      right: 12px;
+    }
+
+    /* === EXECUTION BAR (1-Click Trading) === */
+    .execution-bar {
+      grid-area: execution;
+      background: linear-gradient(180deg, var(--card-background) 0%, var(--panel-background) 100%);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      padding-right: calc(20px + var(--widgetbar-width)); /* Account for widgetbar */
+      gap: 20px;
+    }
+
+    /* Symbol + Live Price */
+    .trade-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 200px;
+    }
+
+    .symbol-info {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .symbol-info .symbol {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .symbol-info .price {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .symbol-info .price.live {
+      animation: price-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes price-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .symbol-info .change {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .symbol-info .change.positive {
+      color: var(--success);
+      background: var(--success-light);
+    }
+
+    .symbol-info .change.negative {
+      color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    .live-pnl {
+      font-size: 16px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .live-pnl.positive { color: var(--success); }
+    .live-pnl.negative { color: var(--danger); }
+
+    /* Quick Trade Buttons */
+    .quick-trade {
+      display: flex;
+      gap: 12px;
+    }
+
+    .trade-btn {
+      padding: 10px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .trade-btn.buy {
+      background: var(--success);
+      color: white;
+    }
+
+    .trade-btn.buy:hover {
+      background: #00e676;
+      box-shadow: 0 0 20px var(--success-glow);
+      transform: translateY(-1px);
+    }
+
+    .trade-btn.sell {
+      background: var(--danger);
+      color: white;
+    }
+
+    .trade-btn.sell:hover {
+      background: #ff6b6b;
+      box-shadow: 0 0 20px var(--danger-glow);
+      transform: translateY(-1px);
+    }
+
+    .trade-btn.glow {
+      animation: btn-glow 3s ease-in-out infinite;
+    }
+
+    @keyframes btn-glow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.1); }
+    }
+
+    /* Position Sizer */
+    .position-sizer {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .size-presets {
+      display: flex;
+      gap: 6px;
+    }
+
+    .size-presets .preset {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .size-presets .preset:hover {
+      background: rgba(108, 92, 231, 0.2);
+      border-color: var(--primary-color);
+      color: var(--primary-light);
+    }
+
+    .size-presets .preset.active {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+    }
+
+    .risk-metrics {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .risk-metrics .rr {
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .risk-metrics .stop {
+      color: var(--danger);
+    }
+
+    /* Emergency Stop */
+    .emergency-stop {
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      background: transparent;
+      border: 2px solid var(--danger);
+      border-radius: 6px;
+      color: var(--danger);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .emergency-stop:hover {
+      background: var(--danger);
+      color: white;
+      box-shadow: 0 0 20px var(--danger-glow);
+      animation: emergency-pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes emergency-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
     }
 
     /* Auth Modal */
@@ -341,37 +805,154 @@
       color: var(--danger);
     }
 
-    /* Right Panels (AI, Sentiment, News, etc.) */
-    .right-panels {
-      width: var(--right-panel-width);
-      background-color: var(--card-background);
-      border-left: 1px solid var(--border-color);
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-    .right-panels.collapsed {
-      transform: translateX(100%);
-    }
-    .panels-toggle {
-      position: absolute;
-      top: calc(var(--header-height) + 10px);
-      right: calc(var(--right-panel-width) + 10px);
-      z-index: 10;
-      width: 24px;
-      height: 24px;
-      background-color: var(--card-background);
-      border: 1px solid var(--border-color);
-      border-radius: 50%;
-      display: flex;
+    /* === SIGNAL GRADING SYSTEM (A+/A/B/C) === */
+    .signal-grade {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      min-width: 36px;
+      height: 28px;
+      padding: 0 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: var(--transition-smooth);
+    }
+
+    .signal-grade.grade-a-plus {
+      background: linear-gradient(135deg, var(--grade-a-plus), #ff6b7a);
+      color: white;
+      box-shadow: var(--grade-a-plus-glow);
+      animation: grade-glow-aplus 2s ease-in-out infinite;
+    }
+
+    .signal-grade.grade-a {
+      background: linear-gradient(135deg, var(--grade-a), #ff9f43);
+      color: white;
+      box-shadow: var(--grade-a-glow);
+      animation: grade-glow-a 2s ease-in-out infinite;
+    }
+
+    .signal-grade.grade-b {
+      background: linear-gradient(135deg, var(--grade-b), #ffeaa7);
+      color: #1a1a2e;
+      box-shadow: var(--grade-b-glow);
+    }
+
+    .signal-grade.grade-c {
+      background: var(--grade-c);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    @keyframes grade-glow-aplus {
+      0%, 100% { box-shadow: var(--grade-a-plus-glow); }
+      50% { box-shadow: 0 0 30px rgba(255, 71, 87, 0.8), 0 0 60px rgba(255, 71, 87, 0.4); }
+    }
+
+    @keyframes grade-glow-a {
+      0%, 100% { box-shadow: var(--grade-a-glow); }
+      50% { box-shadow: 0 0 25px rgba(255, 165, 2, 0.7), 0 0 50px rgba(255, 165, 2, 0.3); }
+    }
+
+    /* Signal Card with Grade */
+    .signal-card {
+      background: var(--panel-background);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      transition: var(--transition-smooth);
       cursor: pointer;
+    }
+
+    .signal-card:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .signal-card.grade-a-plus {
+      border-color: rgba(255, 71, 87, 0.4);
+      background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), transparent);
+    }
+
+    .signal-card.grade-a {
+      border-color: rgba(255, 165, 2, 0.3);
+      background: linear-gradient(135deg, rgba(255, 165, 2, 0.08), transparent);
+    }
+
+    .signal-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .signal-card-symbol {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .signal-card-symbol .symbol {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .signal-card-symbol .direction {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       font-size: 12px;
-      transition: right 0.3s ease;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
     }
-    .panels-toggle.collapsed {
-      right: 10px;
+
+    .signal-card-symbol .direction.long {
+      color: var(--success);
+      background: var(--success-light);
     }
+
+    .signal-card-symbol .direction.short {
+      color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    .signal-card-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .signal-metric {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .signal-metric label {
+      color: var(--text-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .signal-metric value {
+      color: var(--text-color);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .signal-metric value.positive { color: var(--success); }
+    .signal-metric value.negative { color: var(--danger); }
+
+    /* === ENHANCED PANELS === */
     .panel {
       margin: 15px;
       background-color: var(--panel-background);
@@ -412,75 +993,772 @@
       margin-bottom: 10px;
     }
 
-    /* Chart Toolbar */
-    .chart-toolbar {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      z-index: 20;
+    /* === PANEL HEADER CONTROLS - Detach & Link UI === */
+    .panel-header-controls {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .toolbar-group {
-      display: flex;
-      gap: 5px;
-      background-color: rgba(26, 26, 46, 0.8);
-      padding: 5px;
-      border-radius: 6px;
-      backdrop-filter: blur(5px);
-    }
-    .toolbar-separator {
-      width: 1px;
-      background-color: var(--border-color);
-      margin: 0 5px;
-    }
-    .control-button {
-      background-color: rgba(108,92,231,0.2);
-      color: var(--primary-light);
-      border: 1px solid rgba(108,92,231,0.3);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-    .control-button:hover {
-      background-color: rgba(108,92,231,0.3);
-    }
-    .control-button.active {
-      background-color: rgba(108,92,231,0.4);
-      border-color: var(--primary-color);
+      align-items: center;
+      gap: 8px;
     }
 
-    /* Timeframe Controls */
+    .panel-detach-btn {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text-muted, rgba(255,255,255,0.4));
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .panel-detach-btn:hover {
+      background: var(--color-surface-hover, #2a2e39);
+      color: var(--color-text, rgba(255,255,255,0.9));
+      border-color: var(--color-border-hover, rgba(255,255,255,0.12));
+    }
+
+    .panel-detach-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .panel-link-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 150ms ease;
+    }
+
+    .panel-link-indicator:hover {
+      background: var(--color-surface-hover, #2a2e39);
+    }
+
+    .panel-link-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      box-shadow: 0 0 4px currentColor;
+    }
+
+    .panel-link-dot.blue { background-color: var(--color-link-blue, #2962ff); }
+    .panel-link-dot.green { background-color: var(--color-link-green, #26a69a); }
+    .panel-link-dot.orange { background-color: var(--color-link-orange, #ff9800); }
+    .panel-link-dot.purple { background-color: var(--color-link-purple, #6c5ce7); }
+    .panel-link-dot.master { background-color: var(--color-link-master, #ffffff); }
+    .panel-link-dot.none { background-color: var(--color-link-none, #5a5a6a); }
+
+    /* === PANEL HEADER LEFT === */
+    .panel-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header-left h3 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* === PANEL TABS (AI, Screener, News) === */
+    .ai-tabs, .screener-tabs, .news-tabs, .calendar-filters, .signal-filters {
+      display: flex;
+      gap: 2px;
+      background: var(--color-surface, #1e222d);
+      border-radius: 4px;
+      padding: 2px;
+    }
+
+    .ai-tab-btn, .screener-tab-btn, .news-tab-btn, .calendar-filter-btn, .signal-filter-btn {
+      padding: 4px 8px;
+      font-size: 11px;
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted, rgba(255,255,255,0.4));
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .ai-tab-btn:hover, .screener-tab-btn:hover, .news-tab-btn:hover,
+    .calendar-filter-btn:hover, .signal-filter-btn:hover {
+      color: var(--color-text, rgba(255,255,255,0.9));
+      background: var(--color-surface-hover, #2a2e39);
+    }
+
+    .ai-tab-btn.active, .screener-tab-btn.active, .news-tab-btn.active,
+    .calendar-filter-btn.active, .signal-filter-btn.active {
+      color: var(--color-text, rgba(255,255,255,0.9));
+      background: var(--color-primary-light, rgba(41,98,255,0.2));
+    }
+
+    .ai-tab-content, .news-tab-content {
+      display: none;
+    }
+
+    .ai-tab-content.active, .news-tab-content.active {
+      display: block;
+    }
+
+    /* === AI CHAT === */
+    .ai-chat-messages {
+      min-height: 150px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+
+    .ai-message {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .ai-message.assistant {
+      background: var(--color-surface, #1e222d);
+      color: var(--color-text, rgba(255,255,255,0.9));
+    }
+
+    .ai-message.user {
+      background: var(--color-primary-light, rgba(41,98,255,0.2));
+      color: var(--color-text, rgba(255,255,255,0.9));
+      margin-left: 20px;
+    }
+
+    .ai-chat-input {
+      display: flex;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--color-border, rgba(255,255,255,0.06));
+    }
+
+    .ai-chat-input input {
+      flex: 1;
+      padding: 8px 12px;
+      background: var(--color-surface, #1e222d);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-size: 13px;
+    }
+
+    .ai-chat-send {
+      padding: 8px 16px;
+      background: var(--color-primary, #2962ff);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .ai-chat-send:hover {
+      background: var(--color-primary-hover, #1e53e4);
+    }
+
+    /* === PINE EDITOR === */
+    .pine-editor {
+      width: 100%;
+      min-height: 200px;
+      background: var(--color-bg, #131722);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-family: var(--font-family-mono, 'SF Mono', monospace);
+      font-size: 12px;
+      padding: 10px;
+      resize: vertical;
+    }
+
+    .pine-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pine-action-btn, .pine-run-btn, .pine-apply-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      background: var(--color-surface-hover, #2a2e39);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      color: var(--color-text, rgba(255,255,255,0.9));
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .pine-run-btn {
+      background: var(--color-primary, #2962ff);
+      border-color: var(--color-primary, #2962ff);
+      color: white;
+    }
+
+    .pine-apply-btn {
+      background: var(--color-success, #26a69a);
+      border-color: var(--color-success, #26a69a);
+      color: white;
+    }
+
+    /* === NOTIFICATIONS === */
+    .notification-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .notification-item:hover {
+      background: var(--color-surface-hover, #2a2e39);
+    }
+
+    .notification-item.unread {
+      background: var(--color-primary-lighter, rgba(41,98,255,0.1));
+    }
+
+    .notification-icon {
+      font-size: 20px;
+    }
+
+    .notification-text {
+      flex: 1;
+    }
+
+    .notification-title {
+      font-weight: 500;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-size: 13px;
+    }
+
+    .notification-desc {
+      font-size: 12px;
+      color: var(--color-text-secondary, rgba(255,255,255,0.6));
+      margin-top: 2px;
+    }
+
+    .notification-time {
+      font-size: 11px;
+      color: var(--color-text-muted, rgba(255,255,255,0.4));
+      margin-top: 4px;
+    }
+
+    .mark-all-read-btn {
+      padding: 4px 8px;
+      font-size: 11px;
+      background: transparent;
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      color: var(--color-text-secondary, rgba(255,255,255,0.6));
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .mark-all-read-btn:hover {
+      background: var(--color-surface-hover, #2a2e39);
+      color: var(--color-text, rgba(255,255,255,0.9));
+    }
+
+    /* === SETTINGS === */
+    .settings-section {
+      margin-bottom: 20px;
+    }
+
+    .settings-section h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary, rgba(255,255,255,0.6));
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .setting-item label {
+      font-size: 13px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+    }
+
+    .setting-select {
+      padding: 6px 10px;
+      background: var(--color-surface, #1e222d);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-size: 12px;
+    }
+
+    /* === HELP === */
+    .help-section {
+      margin-bottom: 20px;
+    }
+
+    .help-section h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-secondary, rgba(255,255,255,0.6));
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+
+    .shortcut-key {
+      background: var(--color-surface, #1e222d);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: var(--font-family-mono, 'SF Mono', monospace);
+      font-size: 11px;
+      color: var(--color-text-secondary, rgba(255,255,255,0.6));
+    }
+
+    .shortcut-desc {
+      color: var(--color-text, rgba(255,255,255,0.9));
+    }
+
+    .help-link {
+      display: block;
+      padding: 8px 0;
+      color: var(--color-primary, #2962ff);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .help-link:hover {
+      text-decoration: underline;
+    }
+
+    /* === SCREENER === */
+    .screener-filters {
+      margin-bottom: 10px;
+    }
+
+    .screener-filter-select {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--color-surface, #1e222d);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-size: 12px;
+    }
+
+    .screener-loading, .calendar-loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--color-text-muted, rgba(255,255,255,0.4));
+      font-size: 13px;
+    }
+
+    /* === WATCHLIST === */
+    .watchlist-search-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--color-surface, #1e222d);
+      border: 1px solid var(--color-border, rgba(255,255,255,0.06));
+      border-radius: 4px;
+      color: var(--color-text, rgba(255,255,255,0.9));
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    /* === ENHANCED CHART HEADER + TOOLBAR === */
+    .chart-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 25;
+    }
+
+    .chart-symbol-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chart-symbol-display .symbol {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .chart-symbol-display .price-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .chart-symbol-display .current-price {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chart-symbol-display .price-change {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .chart-symbol-display .price-change.up {
+      color: var(--success);
+      background: var(--success-light);
+    }
+
+    .chart-symbol-display .price-change.down {
+      color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 4px;
+      background: var(--panel-background);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .toolbar-separator {
+      width: 1px;
+      height: 24px;
+      background: var(--border-color);
+      margin: 0 4px;
+    }
+
+    .control-button {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .control-button:hover {
+      background: rgba(108, 92, 231, 0.15);
+      color: var(--primary-light);
+    }
+
+    .control-button.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .control-button .icon {
+      font-size: 14px;
+    }
+
+    /* Chart Type Selector */
+    .chart-type-selector {
+      display: flex;
+      gap: 2px;
+    }
+
+    .chart-type-btn {
+      padding: 6px 8px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: var(--transition-smooth);
+    }
+
+    .chart-type-btn:hover {
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chart-type-btn.active {
+      color: var(--primary-light);
+      background: rgba(108, 92, 231, 0.2);
+    }
+
+    /* Timeframe Controls - Floating */
     .timeframe-controls {
       position: absolute;
-      bottom: 15px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
       display: flex;
-      gap: 5px;
-      background-color: rgba(26, 26, 46, 0.8);
-      padding: 5px 10px;
-      border-radius: 6px;
-      backdrop-filter: blur(5px);
+      gap: 4px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-lg);
     }
+
     .timeframe-button {
-      padding: 5px 12px;
+      padding: 6px 12px;
       cursor: pointer;
-      font-size: 14px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      transition: var(--transition-smooth);
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
     }
+
     .timeframe-button:hover {
-      background-color: rgba(108,92,231,0.2);
-    }
-    .timeframe-button.active {
-      background-color: rgba(108,92,231,0.3);
+      background: rgba(108, 92, 231, 0.15);
       color: var(--primary-light);
     }
+
+    .timeframe-button.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.4);
+    }
+
+    /* === PORTFOLIO PANEL WITH VaR === */
+    .portfolio-panel {
+      background: var(--panel-background);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 12px;
+    }
+
+    .portfolio-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .portfolio-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    .portfolio-value {
+      text-align: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(162, 155, 254, 0.05));
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .portfolio-value .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .portfolio-value .amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .portfolio-value .daily-change {
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .portfolio-value .daily-change.positive { color: var(--success); }
+    .portfolio-value .daily-change.negative { color: var(--danger); }
+
+    /* Risk Metrics Grid */
+    .risk-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .risk-metric {
+      background: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .risk-metric .label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .risk-metric .label .info-icon {
+      font-size: 10px;
+      cursor: help;
+      opacity: 0.5;
+    }
+
+    .risk-metric .value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-color);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .risk-metric .value.warning { color: var(--warning); }
+    .risk-metric .value.danger { color: var(--danger); }
+    .risk-metric .value.success { color: var(--success); }
+
+    /* VaR Special Display */
+    .var-display {
+      background: linear-gradient(135deg, rgba(255, 71, 87, 0.1), rgba(255, 107, 107, 0.05));
+      border: 1px solid rgba(255, 71, 87, 0.2);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .var-display .var-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .var-display .var-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .var-display .var-confidence {
+      font-size: 10px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .var-display .var-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--danger);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .var-display .var-percentage {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    /* Position List in Portfolio */
+    .position-list {
+      margin-top: 16px;
+    }
+
+    .position-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .position-list-header h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .position-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: var(--transition-smooth);
+    }
+
+    .position-item:hover {
+      border-color: var(--primary-color);
+    }
+
+    .position-item .position-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .position-item .position-symbol {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-color);
+    }
+
+    .position-item .position-size {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .position-item .position-pnl {
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .position-item .position-pnl.positive { color: var(--success); }
+    .position-item .position-pnl.negative { color: var(--danger); }
 
     /* Loading States */
     .loading-overlay {
@@ -712,26 +1990,424 @@
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Responsive */
-    @media (max-width: 1200px) {
-      .left-sidebar {
-        position: absolute;
-        z-index: 90;
-        height: calc(100vh - var(--header-height));
-      }
-      .right-panels {
-        position: absolute;
-        right: 0;
-        z-index: 90;
-        height: calc(100vh - var(--header-height));
+    /* === RESPONSIVE BREAKPOINTS === */
+
+    /* Desktop Large (>1400px) - Full experience */
+    @media (min-width: 1401px) {
+      :root {
+        --sidebar-width: 260px;
+        --right-panel-width: 340px;
       }
     }
+
+    /* Desktop Standard (1200-1400px) - Slightly compressed */
+    @media (max-width: 1400px) and (min-width: 1201px) {
+      :root {
+        --sidebar-width: 220px;
+        --right-panel-width: 300px;
+      }
+
+      .execution-bar {
+        padding: 0 16px;
+        gap: 16px;
+      }
+
+      .trade-button {
+        min-width: 100px;
+        padding: 10px 16px;
+      }
+    }
+
+    /* Tablet Landscape (992-1200px) - Collapsible panels */
+    @media (max-width: 1200px) and (min-width: 993px) {
+      :root {
+        --sidebar-width: 200px;
+        --right-panel-width: 280px;
+      }
+
+      .platform-container {
+        grid-template-columns: var(--sidebar-width) 1fr 0;
+      }
+
+      .left-sidebar {
+        position: fixed;
+        left: 0;
+        top: var(--header-height);
+        height: calc(100vh - var(--header-height) - var(--execution-bar-height));
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .left-sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .right-panels {
+        position: fixed;
+        right: 0;
+        top: var(--header-height);
+        height: calc(100vh - var(--header-height) - var(--execution-bar-height));
+        width: var(--right-panel-width);
+        z-index: 100;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .right-panels.open {
+        transform: translateX(0);
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .sidebar-toggle,
+      .panels-toggle {
+        display: flex;
+      }
+
+      .chart-header {
+        padding: 0 12px;
+      }
+
+      .execution-bar {
+        padding: 0 12px;
+        gap: 12px;
+      }
+    }
+
+    /* Tablet Portrait (768-992px) - Stacked layout */
+    @media (max-width: 992px) and (min-width: 769px) {
+      :root {
+        --header-height: 48px;
+        --execution-bar-height: 56px;
+        --sidebar-width: 240px;
+        --right-panel-width: 280px;
+      }
+
+      .platform-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr var(--execution-bar-height);
+        grid-template-areas:
+          "chart"
+          "execution";
+      }
+
+      .left-sidebar,
+      .right-panels {
+        position: fixed;
+        top: var(--header-height);
+        height: calc(100vh - var(--header-height) - var(--execution-bar-height));
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .left-sidebar { left: 0; }
+      .right-panels {
+        right: 0;
+        left: auto;
+        transform: translateX(100%);
+      }
+
+      .left-sidebar.open,
+      .right-panels.open {
+        transform: translateX(0);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .chart-symbol-display .symbol {
+        font-size: 14px;
+      }
+
+      .chart-symbol-display .current-price {
+        font-size: 16px;
+      }
+
+      .timeframe-controls {
+        bottom: 12px;
+        padding: 4px 8px;
+      }
+
+      .timeframe-button {
+        padding: 5px 10px;
+        font-size: 11px;
+      }
+
+      .execution-bar {
+        padding: 0 10px;
+        gap: 10px;
+      }
+
+      .trade-header {
+        min-width: 150px;
+      }
+
+      .symbol-info .symbol {
+        font-size: 15px;
+      }
+
+      .symbol-info .price {
+        font-size: 17px;
+      }
+
+      .trade-button {
+        min-width: 90px;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+
+    /* Mobile (< 768px) - Full mobile optimization */
     @media (max-width: 768px) {
+      :root {
+        --header-height: 44px;
+        --execution-bar-height: 52px;
+        --sidebar-width: 100vw;
+        --right-panel-width: 100vw;
+      }
+
+      .header-main {
+        padding: 0 10px;
+      }
+
+      .logo {
+        font-size: 14px;
+      }
+
+      .logo-icon {
+        font-size: 20px;
+      }
+
       .search-bar {
         display: none;
       }
+
       .user-controls {
-        margin-left: auto;
+        gap: 8px;
+      }
+
+      .header-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .platform-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr var(--execution-bar-height);
+        grid-template-areas:
+          "chart"
+          "execution";
+      }
+
+      .left-sidebar,
+      .right-panels {
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--header-height));
+        z-index: 200;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .left-sidebar.open,
+      .right-panels.open {
+        transform: translateY(0);
+      }
+
+      .chart-header {
+        height: 40px;
+        padding: 0 10px;
+      }
+
+      .chart-symbol-display .symbol {
+        font-size: 13px;
+      }
+
+      .chart-symbol-display .current-price {
+        font-size: 15px;
+      }
+
+      .chart-symbol-display .price-change {
+        font-size: 11px;
+        padding: 1px 4px;
+      }
+
+      .toolbar-group {
+        padding: 3px;
+        gap: 2px;
+      }
+
+      .control-button {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+
+      .timeframe-controls {
+        bottom: 10px;
+        padding: 4px 6px;
+        gap: 2px;
+      }
+
+      .timeframe-button {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .execution-bar {
+        padding: 0 8px;
+        gap: 8px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: var(--execution-bar-height);
+        padding: 6px 8px;
+      }
+
+      .trade-header {
+        min-width: auto;
+        flex: 1;
+      }
+
+      .symbol-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+      }
+
+      .symbol-info .symbol {
+        font-size: 13px;
+      }
+
+      .symbol-info .price {
+        font-size: 15px;
+      }
+
+      .position-sizer {
+        flex-direction: row;
+        gap: 6px;
+      }
+
+      .position-sizer .sizer-input {
+        width: 60px;
+        height: 32px;
+        font-size: 12px;
+      }
+
+      .trade-buttons {
+        gap: 6px;
+      }
+
+      .trade-button {
+        min-width: 70px;
+        padding: 8px 10px;
+        font-size: 11px;
+      }
+
+      .emergency-stop {
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+
+      /* Mobile signal cards */
+      .signal-card {
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+
+      .signal-card-metrics {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* Mobile portfolio */
+      .portfolio-value .amount {
+        font-size: 20px;
+      }
+
+      .risk-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .var-display .var-value {
+        font-size: 18px;
+      }
+
+      /* Mobile toast */
+      .toast-container {
+        bottom: calc(var(--execution-bar-height) + 10px);
+        right: 10px;
+        left: 10px;
+        max-width: none;
+      }
+    }
+
+    /* Small Mobile (< 480px) */
+    @media (max-width: 480px) {
+      :root {
+        --execution-bar-height: 48px;
+      }
+
+      .execution-bar {
+        justify-content: center;
+      }
+
+      .trade-header {
+        display: none;
+      }
+
+      .position-sizer {
+        flex: 1;
+      }
+
+      .trade-button {
+        min-width: 60px;
+        padding: 6px 8px;
+      }
+
+      .emergency-stop {
+        padding: 6px 10px;
+      }
+    }
+
+    /* === ANIMATION OPTIMIZATION (60fps) === */
+    .left-sidebar,
+    .right-panels,
+    .execution-bar,
+    .chart-header,
+    .signal-card,
+    .trade-button,
+    .position-item {
+      will-change: transform, opacity;
+    }
+
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .signal-grade.grade-a-plus,
+      .signal-grade.grade-a {
+        animation: none;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --border-color: #4a4a6a;
+        --glass-border: rgba(255, 255, 255, 0.3);
+      }
+
+      .trade-button,
+      .signal-grade,
+      .control-button.active {
+        border: 2px solid currentColor;
       }
     }
   </style>
@@ -800,9 +2476,9 @@
     </div>
   </header>
 
-  <div class="platform-container">
+  <div class="platform-container tv-layout" id="platform-container">
     <!-- Left Sidebar (Watchlist) -->
-    <aside class="left-sidebar" id="left-sidebar">
+    <aside class="left-sidebar tv-left-panel" id="left-sidebar">
       <div id="watchlist-container">
         <!-- Watchlist items will be populated here -->
         <div class="stock-item">
@@ -867,22 +2543,44 @@
         </div>
       </div>
     </aside>
-    <div class="sidebar-toggle" id="sidebar-toggle">
+    <div class="sidebar-toggle tv-panel-toggle left" id="sidebar-toggle" data-panel="left">
       <span>◀</span>
     </div>
 
     <!-- Main Chart Area -->
-    <main style="flex:1; position: relative;">
-      <!-- Chart Toolbar: Advanced Controls -->
-      <div class="chart-toolbar">
-        <div class="toolbar-group">
-          <button class="control-button" id="time-warp-btn" data-tooltip="Visualize historical trends and future scenarios">Time-Warp</button>
-          <button class="control-button" id="vr-mode-btn" data-tooltip="Experience 3D chart in VR mode">VR Mode</button>
-          <button class="control-button" id="lens-btn" data-tooltip="Toggle gravitational lens effect">Grav. Lens</button>
+    <main class="chart-area tv-chart-area">
+      <!-- Enhanced Chart Header -->
+      <div class="chart-header">
+        <div class="chart-symbol-display">
+          <span class="symbol">MSFT</span>
+          <div class="price-display">
+            <span class="current-price" id="chart-price">312.79</span>
+            <span class="price-change up" id="chart-change">+2.48 (+0.80%)</span>
+          </div>
         </div>
-        <div class="toolbar-group">
-          <button class="control-button" id="indicator-btn" data-tooltip="Add technical indicators">Indicators</button>
-          <button class="control-button" id="comparison-btn" data-tooltip="Compare with other assets">Compare</button>
+        <div class="chart-toolbar">
+          <div class="chart-type-selector">
+            <button class="chart-type-btn" data-type="line" title="Line Chart">📈</button>
+            <button class="chart-type-btn active" data-type="candle" title="Candlestick">🕯️</button>
+            <button class="chart-type-btn" data-type="area" title="Area Chart">📊</button>
+          </div>
+          <div class="toolbar-separator"></div>
+          <div class="toolbar-group">
+            <button class="control-button active" id="view-toggle-btn" data-tooltip="Switch between 2D and 3D chart views">
+              <span class="icon">🌐</span> 3D
+            </button>
+            <button class="control-button" id="indicator-btn" data-tooltip="Add technical indicators">
+              <span class="icon">📉</span> Indicators
+            </button>
+            <button class="control-button" id="comparison-btn" data-tooltip="Compare with other assets">
+              <span class="icon">⚖️</span> Compare
+            </button>
+          </div>
+          <div class="toolbar-separator"></div>
+          <div class="toolbar-group">
+            <button class="control-button" id="time-warp-btn" data-tooltip="Visualize historical trends">Time-Warp</button>
+            <button class="control-button" id="lens-btn" data-tooltip="Toggle gravitational lens effect">Lens</button>
+          </div>
         </div>
       </div>
 
@@ -897,6 +2595,60 @@
         
         <!-- Main chart container -->
         <div id="chart-container" style="width: 100%; height: 100%;"></div>
+
+        <!-- 2D Chart container (Lightweight Charts) -->
+        <div id="chart-2d-container" style="width: 100%; height: 100%; display: none;"></div>
+
+        <!-- TradingView-style Context Menu -->
+        <div id="chart-context-menu" class="chart-context-menu">
+          <div class="context-menu-item" data-action="auto-scale">
+            <span><span class="checkmark">✓</span>Auto (fits data to screen)</span>
+          </div>
+          <div class="context-menu-item" data-action="lock-ratio">
+            <span>Lock price to bar ratio</span>
+            <span class="shortcut">0.0008</span>
+          </div>
+          <div class="context-menu-item active" data-action="scale-chart-only">
+            <span><span class="checkmark">✓</span>Scale price chart only</span>
+          </div>
+          <div class="context-menu-item" data-action="invert-scale">
+            <span>Invert scale</span>
+            <span class="shortcut">⌥ I</span>
+          </div>
+          <div class="context-menu-divider"></div>
+          <div class="context-menu-item active" data-action="regular-scale">
+            <span><span class="checkmark">✓</span>Regular</span>
+          </div>
+          <div class="context-menu-item" data-action="percent-scale">
+            <span>Percent</span>
+            <span class="shortcut">⌥ P</span>
+          </div>
+          <div class="context-menu-item" data-action="indexed-scale">
+            <span>Indexed to 100</span>
+          </div>
+          <div class="context-menu-item" data-action="logarithmic-scale">
+            <span>Logarithmic</span>
+            <span class="shortcut">⌥ L</span>
+          </div>
+          <div class="context-menu-divider"></div>
+          <div class="context-menu-item" data-action="move-left">
+            <span>Move scale to left</span>
+          </div>
+          <div class="context-menu-divider"></div>
+          <div class="context-menu-item submenu">
+            <span>Labels</span>
+          </div>
+          <div class="context-menu-item submenu">
+            <span>Lines</span>
+          </div>
+          <div class="context-menu-item active" data-action="plus-button">
+            <span><span class="checkmark">✓</span>Plus button</span>
+          </div>
+          <div class="context-menu-divider"></div>
+          <div class="context-menu-item" data-action="more-settings">
+            <span>⚙ More settings...</span>
+          </div>
+        </div>
       </div>
 
       <!-- Timeframe Controls -->
@@ -910,59 +2662,750 @@
       </div>
     </main>
 
-    <!-- Right Panels: AI, Sentiment, News, etc. -->
-    <aside class="right-panels" id="right-panels">
-      <!-- AI Predictions Panel -->
-      <div class="panel" id="ai-panel">
-        <div class="panel-header">
-          <h3>AI Predictions</h3>
-          <div id="ai-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+    <!-- Right Panels: Portfolio, Signals, AI, Sentiment, News -->
+    <aside class="right-panels tv-right-panel" id="right-panels">
+      <!-- Portfolio Panel with VaR -->
+      <div class="portfolio-panel tv-portfolio" id="portfolio-panel">
+        <div class="portfolio-header tv-panel-header">
+          <h3>Portfolio</h3>
+          <div class="tv-panel-controls">
+            <span class="tv-panel-status live">LIVE</span>
+            <button class="tv-panel-collapse" data-panel="portfolio" title="Collapse">−</button>
+          </div>
         </div>
-        <div class="panel-content" id="ai-content">
-          <!-- Skeleton loader -->
-          <div class="skeleton skeleton-heading"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text-short"></div>
+        <div class="portfolio-value tv-portfolio-value">
+          <div class="label">Total Value</div>
+          <div class="amount" id="portfolio-value">$124,847.50</div>
+          <div class="daily-change positive" id="portfolio-change">+$2,341.25 (+1.91%)</div>
+        </div>
+        <div class="risk-metrics tv-metrics-grid">
+          <div class="risk-metric tv-metric" data-metric="win-rate">
+            <div class="label">Win Rate <span class="info-icon tv-tooltip" data-tooltip="Win rate over last 30 trades">ⓘ</span></div>
+            <div class="value success" id="win-rate">68.4%</div>
+          </div>
+          <div class="risk-metric tv-metric" data-metric="sharpe">
+            <div class="label">Sharpe Ratio <span class="info-icon tv-tooltip" data-tooltip="Risk-adjusted return">ⓘ</span></div>
+            <div class="value" id="sharpe-ratio">1.87</div>
+          </div>
+          <div class="risk-metric tv-metric" data-metric="max-dd">
+            <div class="label">Max DD <span class="info-icon tv-tooltip" data-tooltip="Maximum Drawdown">ⓘ</span></div>
+            <div class="value warning" id="max-dd">-8.2%</div>
+          </div>
+          <div class="risk-metric tv-metric" data-metric="profit-factor">
+            <div class="label">Profit Factor</div>
+            <div class="value" id="profit-factor">2.14</div>
+          </div>
+        </div>
+        <div class="var-display tv-var-display">
+          <div class="var-header">
+            <span class="var-label">Value at Risk (VaR)</span>
+            <span class="var-confidence tv-badge">95% CI</span>
+          </div>
+          <div class="var-values">
+            <span class="var-value tv-var-value" id="var-value">-$3,745</span>
+            <span class="var-percentage">(-3.0%)</span>
+          </div>
+        </div>
+        <div class="position-list tv-positions-list">
+          <div class="position-list-header">
+            <h4 class="positions-count">Open Positions (3)</h4>
+          </div>
+          <div class="positions-items">
+            <!-- Positions rendered dynamically by PortfolioController -->
+          </div>
         </div>
       </div>
 
-      <!-- Social Sentiment Panel -->
-      <div class="panel" id="sentiment-panel">
-        <div class="panel-header">
-          <h3>Social Sentiment</h3>
-          <div id="sentiment-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+      <!-- Watchlist Panel -->
+      <div class="panel tv-watchlist-panel" id="watchlist-panel" data-panel="watchlist" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Watchlist</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="panel-link-indicator" data-panel="watchlist" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="watchlist" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="panel-content" id="sentiment-content">
-          <!-- Skeleton loader -->
-          <div class="skeleton skeleton-heading"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text-short"></div>
+        <div class="panel-content watchlist-list tv-watchlist-list" id="watchlist-content">
+          <div class="watchlist-search">
+            <input type="text" placeholder="Search symbols..." class="watchlist-search-input" />
+          </div>
+          <div class="watchlist-items">
+            <!-- Watchlist items rendered dynamically -->
+          </div>
         </div>
       </div>
 
-      <!-- Market News Panel -->
-      <div class="panel" id="news-panel">
-        <div class="panel-header">
-          <h3>Market News</h3>
-          <div id="news-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+      <!-- Alerts Panel -->
+      <div class="panel tv-alerts-panel" id="alerts-panel" data-panel="alerts" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Alerts</h3>
+            <span class="tv-badge">1 active</span>
+          </div>
+          <div class="panel-header-controls">
+            <div class="panel-link-indicator" data-panel="alerts" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="alerts" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="panel-content" id="news-content">
-          <!-- Skeleton loader -->
-          <div class="skeleton skeleton-heading"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text-short"></div>
-          <div style="margin-top: 15px;"></div>
-          <div class="skeleton skeleton-heading"></div>
-          <div class="skeleton skeleton-text"></div>
-          <div class="skeleton skeleton-text-short"></div>
+        <div class="panel-content alerts-list tv-alerts-list" id="alerts-content">
+          <!-- Alerts rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- AI Signals Panel with Grading -->
+      <div class="panel tv-signals-panel" id="signals-panel" data-panel="signals">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>AI Signals</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="signal-filters">
+              <button class="signal-filter-btn active" data-filter="all">All</button>
+              <button class="signal-filter-btn" data-filter="buy">Buy</button>
+              <button class="signal-filter-btn" data-filter="sell">Sell</button>
+            </div>
+            <label class="auto-trade-toggle tv-toggle">
+              <input type="checkbox" id="auto-trade-toggle">
+              <span class="tv-toggle-slider"></span>
+              <span class="tv-toggle-label">Auto</span>
+            </label>
+            <span class="signals-count tv-badge">3 pending</span>
+            <div class="panel-link-indicator" data-panel="signals" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="signals" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+            <button class="clear-signals-btn tv-btn-icon" id="clear-signals" title="Clear all signals">✕</button>
+          </div>
+        </div>
+        <div class="panel-content signals-list tv-signals-list" id="signals-content">
+          <!-- Signals rendered dynamically by SignalsController -->
+        </div>
+      </div>
+
+      <!-- AI Combined Panel (Predictions + Assistant) -->
+      <div class="panel tv-ai-panel" id="ai-combined-panel" data-panel="ai" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>AI Assistant</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="ai-tabs">
+              <button class="ai-tab-btn active" data-tab="predictions">Predictions</button>
+              <button class="ai-tab-btn" data-tab="assistant">Chat</button>
+            </div>
+            <div class="panel-link-indicator" data-panel="ai" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="ai" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+            <div id="ai-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+          </div>
+        </div>
+        <div class="panel-content ai-combined-content" id="ai-combined-content">
+          <!-- Tab: Predictions -->
+          <div class="ai-tab-content active" data-tab="predictions" id="ai-content">
+            <div class="skeleton skeleton-heading"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text-short"></div>
+          </div>
+          <!-- Tab: Assistant Chat -->
+          <div class="ai-tab-content" data-tab="assistant" style="display: none;">
+            <div class="ai-chat-messages" id="ai-chat-messages">
+              <div class="ai-message assistant">How can I help with your trading today?</div>
+            </div>
+            <div class="ai-chat-input">
+              <input type="text" id="ai-chat-input" placeholder="Ask about markets, signals, or strategies..." />
+              <button class="ai-chat-send" id="ai-chat-send">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Screener Panel -->
+      <div class="panel tv-screener-panel" id="screener-panel" data-panel="screener" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Screener</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="screener-tabs">
+              <button class="screener-tab-btn active" data-tab="stocks">Stocks</button>
+              <button class="screener-tab-btn" data-tab="crypto">Crypto</button>
+              <button class="screener-tab-btn" data-tab="custom">Custom</button>
+            </div>
+            <div class="panel-link-indicator" data-panel="screener" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="screener" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content screener-content" id="screener-content">
+          <!-- Screener content rendered dynamically -->
+          <div class="screener-filters">
+            <select class="screener-filter-select">
+              <option value="">Add Filter...</option>
+              <option value="rsi">RSI</option>
+              <option value="macd">MACD</option>
+              <option value="sma">SMA</option>
+              <option value="volume">Volume</option>
+              <option value="price">Price</option>
+            </select>
+          </div>
+          <div class="screener-results">
+            <div class="screener-loading">Loading results...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pine Script Panel -->
+      <div class="panel tv-pine-panel" id="pine-panel" data-panel="pine" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Pine Script</h3>
+          </div>
+          <div class="panel-header-controls">
+            <button class="pine-action-btn" id="pine-new" title="New Script">New</button>
+            <button class="pine-action-btn" id="pine-save" title="Save Script">Save</button>
+            <div class="panel-link-indicator" data-panel="pine" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="pine" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content pine-content" id="pine-content">
+          <textarea class="pine-editor" id="pine-editor" placeholder="//@version=5
+indicator(&quot;My Indicator&quot;, overlay=true)
+
+// Your Pine Script code here
+plot(close)"></textarea>
+          <div class="pine-actions">
+            <button class="pine-run-btn" id="pine-run">Run Script</button>
+            <button class="pine-apply-btn" id="pine-apply">Apply to Chart</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar Panel -->
+      <div class="panel tv-calendar-panel" id="calendar-panel" data-panel="calendar" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Economic Calendar</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="calendar-filters">
+              <button class="calendar-filter-btn active" data-filter="all">All</button>
+              <button class="calendar-filter-btn" data-filter="high">High Impact</button>
+            </div>
+            <div class="panel-link-indicator" data-panel="calendar" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="calendar" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content calendar-content" id="calendar-content">
+          <!-- Calendar events rendered dynamically -->
+          <div class="calendar-loading">Loading calendar...</div>
+        </div>
+      </div>
+
+      <!-- News & Sentiment Panel -->
+      <div class="panel tv-news-panel" id="news-panel" data-panel="news" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>News & Sentiment</h3>
+          </div>
+          <div class="panel-header-controls">
+            <div class="news-tabs">
+              <button class="news-tab-btn active" data-tab="news">News</button>
+              <button class="news-tab-btn" data-tab="sentiment">Sentiment</button>
+            </div>
+            <div class="panel-link-indicator" data-panel="news" title="Link Group">
+              <span class="panel-link-dot blue"></span>
+            </div>
+            <button class="panel-detach-btn" data-panel="news" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+            <div id="news-refresh" style="cursor: pointer; font-size: 14px;">↻</div>
+          </div>
+        </div>
+        <div class="panel-content news-combined-content" id="news-combined-content">
+          <!-- Tab: News -->
+          <div class="news-tab-content active" data-tab="news" id="news-content">
+            <div class="skeleton skeleton-heading"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text-short"></div>
+          </div>
+          <!-- Tab: Sentiment -->
+          <div class="news-tab-content" data-tab="sentiment" id="sentiment-content" style="display: none;">
+            <div class="skeleton skeleton-heading"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text-short"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications Panel -->
+      <div class="panel tv-notifications-panel" id="notifications-panel" data-panel="notifications" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Notifications</h3>
+            <span class="tv-badge">3 new</span>
+          </div>
+          <div class="panel-header-controls">
+            <button class="mark-all-read-btn" id="mark-all-read" title="Mark all as read">Mark all read</button>
+            <button class="panel-detach-btn" data-panel="notifications" title="Detach to new window">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="panel-content notifications-content" id="notifications-content">
+          <!-- Notifications rendered dynamically -->
+          <div class="notification-item unread">
+            <div class="notification-icon">🔔</div>
+            <div class="notification-text">
+              <div class="notification-title">AAPL Alert Triggered</div>
+              <div class="notification-desc">Price crossed above $185.00</div>
+              <div class="notification-time">2 minutes ago</div>
+            </div>
+          </div>
+          <div class="notification-item unread">
+            <div class="notification-icon">⚡</div>
+            <div class="notification-text">
+              <div class="notification-title">New AI Signal: NVDA</div>
+              <div class="notification-desc">Buy signal with A+ grade</div>
+              <div class="notification-time">5 minutes ago</div>
+            </div>
+          </div>
+          <div class="notification-item unread">
+            <div class="notification-icon">📊</div>
+            <div class="notification-text">
+              <div class="notification-title">Screener Match</div>
+              <div class="notification-desc">3 stocks match your custom filter</div>
+              <div class="notification-time">10 minutes ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div class="panel tv-settings-panel" id="settings-panel" data-panel="settings" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Settings</h3>
+          </div>
+          <div class="panel-header-controls">
+            <!-- Settings not detachable -->
+          </div>
+        </div>
+        <div class="panel-content settings-content" id="settings-content">
+          <div class="settings-section">
+            <h4>Appearance</h4>
+            <div class="setting-item">
+              <label>Theme</label>
+              <select class="setting-select" id="theme-select">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h4>Notifications</h4>
+            <div class="setting-item">
+              <label>Sound Alerts</label>
+              <label class="tv-toggle">
+                <input type="checkbox" id="sound-alerts-toggle" checked>
+                <span class="tv-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label>Desktop Notifications</label>
+              <label class="tv-toggle">
+                <input type="checkbox" id="desktop-notifications-toggle" checked>
+                <span class="tv-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h4>Trading</h4>
+            <div class="setting-item">
+              <label>Confirm Orders</label>
+              <label class="tv-toggle">
+                <input type="checkbox" id="confirm-orders-toggle" checked>
+                <span class="tv-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help Panel -->
+      <div class="panel tv-help-panel" id="help-panel" data-panel="help" style="display: none;">
+        <div class="panel-header tv-panel-header">
+          <div class="panel-header-left">
+            <h3>Help Center</h3>
+          </div>
+          <div class="panel-header-controls">
+            <!-- Help not detachable -->
+          </div>
+        </div>
+        <div class="panel-content help-content" id="help-content">
+          <div class="help-section">
+            <h4>Keyboard Shortcuts</h4>
+            <div class="shortcut-item">
+              <span class="shortcut-key">Ctrl + \</span>
+              <span class="shortcut-desc">Toggle sidebar</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-key">Alt + 1-9</span>
+              <span class="shortcut-desc">Quick panel access</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-key">Ctrl + Shift + D</span>
+              <span class="shortcut-desc">Detach current panel</span>
+            </div>
+          </div>
+          <div class="help-section">
+            <h4>Quick Links</h4>
+            <a href="#" class="help-link">Documentation</a>
+            <a href="#" class="help-link">Video Tutorials</a>
+            <a href="#" class="help-link">Contact Support</a>
+          </div>
         </div>
       </div>
     </aside>
-    <div class="panels-toggle" id="panels-toggle">
-      <span>▶</span>
+    <!-- TradingView-Style Widgetbar Hider (Panel Toggle) -->
+    <div class="panels-toggle tv-panel-toggle right widgetbar-hider" id="panels-toggle" data-panel="right" role="button" aria-label="Toggle right panel" aria-expanded="true" tabindex="0">
+      <div class="hider-inner apply-common-tooltip common-tooltip-vertical common-tooltip-otl">
+        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="27" viewBox="0 0 9 27" class="hider-svg">
+          <g fill="none" fill-rule="evenodd">
+            <path class="background-pill" d="M4.5.5a4 4 0 0 1 4 4v18a4 4 0 1 1-8 0v-18a4 4 0 0 1 4-4z"></path>
+            <path class="arrow-icon" d="M5.5 10l-2 3.5 2 3.5"></path>
+          </g>
+        </svg>
+      </div>
+      <span class="tv-tooltip">Hide panel</span>
+    </div>
+
+    <!-- TradingView-Style Right Widgetbar Toolbar -->
+    <div class="tv-widgetbar" id="widgetbar" role="toolbar" aria-label="Right toolbar" aria-orientation="vertical">
+      <div class="tv-widgetbar-tabs">
+        <div class="tv-widgetbar-scroll">
+          <div class="tv-widgetbar-content">
+            <div class="tv-widgetbar-toolbar" data-name="right-toolbar">
+              <!-- Watchlist Button -->
+              <button
+                aria-label="Watchlist, details and news"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="base"
+                data-tooltip="Watchlist"
+                data-panel="watchlist"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" d="M28 16H16v1h12v-1ZM28 20H16v1h12v-1ZM16 24h12v1H16v-1Z"></path>
+                  <path fill="currentColor" fill-rule="evenodd" d="m22 30-10 4V12a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v22l-10-4Zm-9 2.52V12h18v20.52l-9-3.6-9 3.6Z"></path>
+                </svg>
+                <span class="tv-tooltip">Watchlist</span>
+              </button>
+
+              <!-- Alerts Button -->
+              <button
+                aria-label="Alerts"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="alerts"
+                data-tooltip="Alerts"
+                data-panel="alerts"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" d="M35 14.66 29.16 9l-.7.72 5.84 5.66.7-.72ZM9 14.66 14.84 9l.7.72-5.84 5.66-.7-.72ZM22 16v7h-5v1h6v-8h-1Z"></path>
+                  <path fill="currentColor" fill-rule="evenodd" d="M22 33a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm0-1a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"></path>
+                </svg>
+                <div class="tv-counter-row">
+                  <span class="tv-counter small color-danger" aria-label="1 unread alert">1</span>
+                </div>
+                <span class="tv-tooltip">Alerts</span>
+              </button>
+
+              <!-- Object Tree / Signals Button -->
+              <button
+                aria-label="Object Tree and Signals"
+                aria-pressed="true"
+                type="button"
+                class="tv-widgetbar-btn active"
+                data-name="object_tree"
+                data-tooltip="Signals"
+                data-panel="signals"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" d="M21.34 12.13a1 1 0 0 1 .98 0l10.41 5.93a1 1 0 0 1 0 1.73l-10.4 5.93a1 1 0 0 1-.99 0L10.78 19.8a1 1 0 0 1 0-1.75l10.56-5.92Zm.49.87-10.56 5.93 10.56 5.93 10.4-5.93L21.84 13ZM33.5 24.86l-11.66 6.8L10 25l.5-.87 11.33 6.38L32.99 24l.5.87Z"></path>
+                </svg>
+                <span class="tv-tooltip">Signals</span>
+              </button>
+
+              <!-- AI Chat Button -->
+              <button
+                aria-label="AI Assistant"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="ai_chat"
+                data-tooltip="AI Assistant"
+                data-panel="ai"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" fill="none">
+                  <path fill="currentColor" fill-rule="evenodd" d="M11 14.5a2.5 2.5 0 0 1 2.5-2.5h13a2.5 2.5 0 0 1 2.5 2.5v9a2.5 2.5 0 0 1-2.5 2.5H14.3l-.15.15L11 29.29V14.5Zm2.5-3.5a3.5 3.5 0 0 0-3.5 3.5v17.2l.85-.85L14.71 27H19v.5a3.5 3.5 0 0 0 3.5 3.5H29.3l3.86 3.85.85.86V22.5a3.5 3.5 0 0 0-3.5-3.5H30v-4.5a3.5 3.5 0 0 0-3.5-3.5h-13ZM30 20v3.5a3.5 3.5 0 0 1-3.5 3.5H20v.5a2.5 2.5 0 0 0 2.5 2.5H29.7l.15.15L33 33.29V22.5a2.5 2.5 0 0 0-2.5-2.5H30Z"></path>
+                </svg>
+                <span class="tv-tooltip">AI Assistant</span>
+              </button>
+
+              <!-- Spacer/Filler -->
+              <div class="tv-widgetbar-filler"></div>
+
+              <!-- Screeners Button -->
+              <button
+                aria-label="Screeners"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="screener"
+                data-tooltip="Screeners"
+                data-panel="screener"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" fill="currentColor">
+                  <g clip-path="url(#screener-a)">
+                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M22 8a14 14 0 1 0 0 28 14 14 0 0 0 0-28ZM9 22a13 13 0 0 1 22.03-9.35L27.5 16.2a8 8 0 1 0 .68.73l3.55-3.55A13 13 0 1 1 9 22Zm17.79-5.1a7 7 0 1 0 .68.74l-3.62 3.6A2 2 0 0 1 22 24a2 2 0 1 1 1.25-3.56l3.54-3.54Z"></path>
+                  </g>
+                  <defs>
+                    <clipPath id="screener-a">
+                      <path fill="currentColor" d="M0 0h44v44H0z"></path>
+                    </clipPath>
+                  </defs>
+                </svg>
+                <span class="tv-tooltip">Screeners</span>
+              </button>
+
+              <!-- Pine Script / Strategy Button -->
+              <button
+                aria-label="Pine Script"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="pine"
+                data-tooltip="Strategy Editor"
+                data-panel="pine"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" d="M22.38 10.18a.5.5 0 0 0-.78.02l-9.5 12.5a.5.5 0 0 0 .57.77l6.85-2.4 5.72 4.81c.17.14.4.16.59.04l5.93-3.75a.5.5 0 0 0 .12-.74zm-8.47 11.8L22 11.3l8.73 10.33-5.14 3.25-5.65-4.76a.5.5 0 0 0-.5-.1z"></path>
+                  <path fill="currentColor" d="M13.64 26 9.1 32.2a.5.5 0 0 0 .4.8h25a.5.5 0 0 0 .4-.8L30.36 26l-.8.59 3.95 5.4H10.5l3.96-5.4z"></path>
+                </svg>
+                <span class="tv-tooltip">Strategy Editor</span>
+              </button>
+
+              <!-- Calendar Button -->
+              <button
+                aria-label="Economic Calendar"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="calendar"
+                data-tooltip="Calendar"
+                data-panel="calendar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" fill-rule="evenodd" d="M15 11h2v4h-2v-4Zm-1 0a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1h8v-1a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1h1a3 3 0 0 1 3 3v16a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3V15a3 3 0 0 1 3-3h1v-1Zm4 2h8v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2h1a2 2 0 0 1 2 2v4H11v-4c0-1.1.9-2 2-2h1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2Zm-7 7v11c0 1.1.9 2 2 2h18a2 2 0 0 0 2-2V20H11Zm18-9h-2v4h2v-4Z"></path>
+                </svg>
+                <span class="tv-tooltip">Calendar</span>
+              </button>
+
+              <!-- Community/News Button -->
+              <button
+                aria-label="News & Community"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="community"
+                data-tooltip="News"
+                data-panel="news"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+                  <path fill="currentColor" d="M24.78 15.6a.9.9 0 0 1-1.31.96l-1.47-.8-1.47.8a.9.9 0 0 1-1.31-.96l.3-1.64-1.2-1.15a.9.9 0 0 1 .5-1.54l1.65-.22.72-1.51.07-.12a.9.9 0 0 1 1.55.12l.72 1.5 1.65.23a.9.9 0 0 1 .5 1.54l-1.2 1.15zm-1.3-1.51a.9.9 0 0 1 .27-.82l1.1-1.04-1.5-.2a.9.9 0 0 1-.7-.5L22 10.16l-.65 1.37a.9.9 0 0 1-.7.5l-1.5.2 1.1 1.04a.9.9 0 0 1 .27.82l-.28 1.49 1.33-.73.1-.04a1 1 0 0 1 .66 0l.1.04 1.33.73zm4.88 5.27a9 9 0 0 1-12.72 0l-.03-.03.63-.79.1.11a8 8 0 0 0 11.32 0l.12-.13.64.78zm3.86 4.6a15 15 0 0 1-20.4.04l.63-.78a14 14 0 0 0 19.14-.03zm3.8 4.66a21 21 0 0 1-28 .05l.64-.78a20 20 0 0 0 26.73-.04z"></path>
+                </svg>
+                <div class="tv-counter-row">
+                  <span class="tv-counter small color-danger" aria-label="New updates">5</span>
+                </div>
+                <span class="tv-tooltip">News</span>
+              </button>
+
+              <!-- Notifications Button -->
+              <button
+                aria-label="Notifications"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="notifications"
+                data-tooltip="Notifications"
+                data-panel="notifications"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" fill="none">
+                  <path fill="currentColor" d="M22 8a3.99 3.99 0 0 1 3.941 3.303A10 10 0 0 1 32 20.496v6.554a2.501 2.501 0 0 1-.5 4.95h-5.626a4.002 4.002 0 0 1-7.748 0H12.5a2.5 2.5 0 0 1-.5-4.95v-6.554c0-4.123 2.496-7.664 6.059-9.193A3.99 3.99 0 0 1 22 8m-2.83 24a3.001 3.001 0 0 0 5.66 0zm-6.67-4a1.5 1.5 0 0 0 0 3h19a1.5 1.5 0 0 0 0-3zM22 8.987a3 3 0 0 0-2.956 2.486L18.95 12l-.498.222A9 9 0 0 0 13 20.496V27h18v-6.504a9 9 0 0 0-5.453-8.274L25.049 12l-.093-.527A3 3 0 0 0 22 8.987"></path>
+                </svg>
+                <div class="tv-counter-row">
+                  <span class="tv-counter small color-warning" aria-label="3 notifications">3</span>
+                </div>
+                <span class="tv-tooltip">Notifications</span>
+              </button>
+
+              <!-- Separator -->
+              <div class="tv-widgetbar-separator"></div>
+
+              <!-- Settings Button -->
+              <button
+                aria-label="Settings"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="settings"
+                data-tooltip="Settings"
+                data-panel="settings"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" fill="none">
+                  <path fill="currentColor" d="M22 8c7.732 0 14 6.268 14 14s-6.268 14-14 14S8 29.732 8 22 14.268 8 22 8m-8 22a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm-14-7a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm-14-7a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1zm7 0a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1z"></path>
+                </svg>
+                <span class="tv-tooltip">Settings</span>
+              </button>
+
+              <!-- Help Button -->
+              <button
+                aria-label="Help Center"
+                aria-pressed="false"
+                type="button"
+                class="tv-widgetbar-btn"
+                data-name="help"
+                data-tooltip="Help Center"
+                data-panel="help"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" fill="none">
+                  <path fill="currentColor" d="M22 8c7.732 0 14 6.268 14 14s-6.268 14-14 14S8 29.732 8 22 14.268 8 22 8m0 1C14.82 9 9 14.82 9 22s5.82 13 13 13 13-5.82 13-13S29.18 9 22 9m.201 18.01A2.016 2.016 0 0 1 24 29l-.01.204A2.017 2.017 0 0 1 22 31l-.201-.01a2.02 2.02 0 0 1-1.788-1.785L20 29c0-1.104.917-2 2-2zM22 28c-.537 0-1 .455-1 1s.462 1 1 1 1-.455 1-1-.462-1-1-1m.31-15C24.9 13 27 15.1 27 17.69a4.31 4.31 0 0 1-2.195 3.754l-.872.492a2.81 2.81 0 0 0-1.433 2.45V25h-1v-.614c0-1.377.743-2.647 1.942-3.322l.872-.49A3.31 3.31 0 0 0 26 17.688 3.69 3.69 0 0 0 22.31 14H22a4 4 0 0 0-4 4h-1a5 5 0 0 1 5-5z"></path>
+                </svg>
+                <span class="tv-tooltip">Help Center</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Execution Bar (1-Click Trading) -->
+    <div class="execution-bar tv-execution-bar" id="execution-bar">
+      <!-- Symbol + Live Price -->
+      <div class="trade-header tv-trade-symbol">
+        <div class="symbol-info">
+          <span class="symbol" id="trade-symbol">MSFT</span>
+          <span class="price live" id="trade-price">$312.79</span>
+          <span class="change positive" id="trade-change">+0.8%</span>
+        </div>
+        <div class="live-pnl positive" id="live-pnl">+$1,247.50</div>
+      </div>
+
+      <!-- Position Sizer (Kelly Criterion) -->
+      <div class="position-sizer tv-position-sizer">
+        <div class="sizer-group">
+          <label class="sizer-label">Shares</label>
+          <input type="number" class="sizer-input tv-input" id="shares-input" name="shares" value="100" min="1" step="1">
+        </div>
+        <div class="sizer-group">
+          <label class="sizer-label">$</label>
+          <input type="number" class="sizer-input tv-input" id="dollar-input" name="dollar" value="31279" min="1" step="100">
+        </div>
+        <div class="sizer-group">
+          <label class="sizer-label">Risk %</label>
+          <input type="number" class="sizer-input tv-input" id="risk-input" name="risk" value="2" min="0.1" max="100" step="0.1">
+        </div>
+        <button class="kelly-btn tv-kelly-btn" id="kelly-btn" title="Calculate optimal position using Kelly Criterion">
+          <span class="kelly-icon">K</span>
+          Kelly
+        </button>
+      </div>
+
+      <!-- Trade Buttons -->
+      <div class="trade-buttons tv-trade-actions">
+        <button class="trade-button buy tv-trade-btn" id="buy-btn">
+          <span class="btn-icon">▲</span>
+          BUY
+        </button>
+        <button class="trade-button sell tv-trade-btn" id="sell-btn">
+          <span class="btn-icon">▼</span>
+          SELL
+        </button>
+      </div>
+
+      <!-- Emergency Stop -->
+      <button class="emergency-stop tv-emergency-btn" id="emergency-stop">
+        <span class="stop-icon">⬢</span>
+        CLOSE ALL
+      </button>
     </div>
   </div>
 
@@ -1298,17 +3741,94 @@ function myIndicator(data) {
       justify-content: flex-end;
       gap: 10px;
     }
+
+    /* TradingView-style Context Menu */
+    .chart-context-menu {
+      position: fixed;
+      background: #1e222d;
+      border: 1px solid #2a2e39;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      padding: 4px 0;
+      min-width: 220px;
+      z-index: 10000;
+      display: none;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+    }
+
+    .chart-context-menu.active {
+      display: block;
+    }
+
+    .context-menu-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #d1d4dc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.2s;
+      user-select: none;
+    }
+
+    .context-menu-item:hover {
+      background: #2a2e39;
+    }
+
+    .context-menu-item.active {
+      color: #2962ff;
+    }
+
+    .context-menu-item .checkmark {
+      width: 16px;
+      margin-right: 8px;
+      color: #2962ff;
+    }
+
+    .context-menu-item .shortcut {
+      margin-left: auto;
+      color: #787b86;
+      font-size: 11px;
+    }
+
+    .context-menu-divider {
+      height: 1px;
+      background: #2a2e39;
+      margin: 4px 0;
+    }
+
+    .context-menu-item.submenu::after {
+      content: '›';
+      margin-left: auto;
+      color: #787b86;
+    }
+
+    .context-menu-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .context-menu-item.disabled:hover {
+      background: transparent;
+    }
+
+    .context-menu-section-title {
+      padding: 6px 16px 4px;
+      color: #787b86;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
   </style>
 
   <!-- Import Three.js and its extensions from CDN -->
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/EffectComposer.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/RenderPass.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/ShaderPass.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/shaders/CopyShader.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <!-- Use working CDN version -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- TradingView Lightweight Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.8.0/dist/lightweight-charts.standalone.production.js"></script>
   
   <!-- Fragment shader for gravitational lensing effect -->
   <script id="gravitationalLensShader" type="x-shader/x-fragment">
@@ -1401,6 +3921,45 @@ function myIndicator(data) {
   </script>
 
   <script type="module">
+    // Global error handler
+    window.onerror = (msg, url, line, col, error) => {
+      console.error('Global error:', { msg, url, line, col, error });
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) {
+        overlay.innerHTML = `<div style="color: red; padding: 20px;"><h2>Error Loading Platform</h2><pre>${msg}\n${url}:${line}</pre></div>`;
+      }
+      return false;
+    };
+
+    // Import Moon AI Trading Platform v6.5
+    let app;
+    try {
+      const module = await import('./src/main.js');
+      app = module.app;
+      console.log('✓ main.js loaded successfully');
+
+      // Hide loading overlay after successful import
+      setTimeout(() => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+          overlay.classList.add('fade-out');
+          setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        }
+      }, 1000);
+    } catch (e) {
+      console.error('❌ Failed to load main.js:', e);
+      const overlay = document.getElementById('loading-overlay');
+      if (overlay) {
+        overlay.innerHTML = `<div style="color: red; padding: 40px; text-align: center;">
+          <h2>Error Loading Platform</h2>
+          <pre style="text-align: left; max-width: 600px; margin: 20px auto; overflow: auto;">${e.message}\n\n${e.stack}</pre>
+        </div>`;
+      }
+    }
+
+    // Make app accessible globally
+    window.moonAI = app;
+
     // Load Web Speech API if available
     let speechRecognition;
     let speechSynthesis;
@@ -1542,22 +4101,23 @@ function myIndicator(data) {
     }
     
     try {
-      const supabaseModule = await import('./supabase-integration.js');
-      ({
-        supabaseClient,
-        signUp,
-        signIn,
-        signOut,
-        onAuthStateChange,
-        getMarketData,
-        convertCandlestickData,
-        subscribeToMarketData,
-        getWatchlists,
-        getSocialSentiment,
-        getNews,
-        getPrediction
-      } = supabaseModule);
-      
+      // Disable Supabase - using local CSV data instead
+      console.log('Skipping Supabase initialization - using local data');
+
+      // Create stub functions for Supabase
+      supabaseClient = null;
+      signUp = async () => ({ error: 'Supabase disabled' });
+      signIn = async () => ({ error: 'Supabase disabled' });
+      signOut = async () => ({ error: 'Supabase disabled' });
+      onAuthStateChange = () => ({ data: { subscription: { unsubscribe: () => {} } } });
+      getMarketData = async () => ({ error: 'Using local CSV data' });
+      convertCandlestickData = (data) => data;
+      subscribeToMarketData = () => ({ unsubscribe: () => {} });
+      getWatchlists = async () => ({ data: [], error: null });
+      getSocialSentiment = async () => ({ data: null, error: 'Disabled' });
+      getNews = async () => ({ data: [], error: null });
+      getPrediction = async () => ({ data: null, error: 'Disabled' });
+
       // Mark initialization task as complete
       updateLoadingProgress('initialize', true);
       
@@ -1584,7 +4144,7 @@ function myIndicator(data) {
 
     // Global variables
     let chart;
-    let currentSymbol = 'MSFT';
+    let currentSymbol = 'ATANA';
     let currentTimeframe = '1w';
     let chartReady = false;
 
@@ -1610,15 +4170,23 @@ function myIndicator(data) {
       }
     });
 
-    // Panels toggle
+    // Panels toggle (TradingView-style widgetbar hider)
     panelsToggle.addEventListener('click', () => {
-      rightPanels.classList.toggle('collapsed');
+      const isCollapsed = rightPanels.classList.toggle('collapsed');
       panelsToggle.classList.toggle('collapsed');
-      if (panelsToggle.classList.contains('collapsed')) {
-        panelsToggle.innerHTML = '<span>◀</span>';
-      } else {
-        panelsToggle.innerHTML = '<span>▶</span>';
+      document.querySelector('.platform-container')?.classList.toggle('right-panel-collapsed', isCollapsed);
+
+      // Update accessibility and tooltip
+      panelsToggle.setAttribute('aria-expanded', !isCollapsed);
+      const tooltip = panelsToggle.querySelector('.tv-tooltip');
+      if (tooltip) {
+        tooltip.textContent = isCollapsed ? 'Show panel' : 'Hide panel';
       }
+
+      // Dispatch custom event for chart resize
+      window.dispatchEvent(new CustomEvent('panelToggle', {
+        detail: { panel: 'right', collapsed: isCollapsed }
+      }));
     });
 
     // Tabs and forms
@@ -1719,9 +4287,8 @@ function myIndicator(data) {
 
       async initializeWhenReady() {
         // Check if Three.js is loaded, if not, wait for it
-        if (typeof THREE === 'undefined' || 
-            typeof THREE.EffectComposer === 'undefined' || 
-            typeof THREE.UnrealBloomPass === 'undefined') {
+        if (typeof THREE === 'undefined' ||
+            typeof THREE.OrbitControls === 'undefined') {
           setTimeout(() => this.initializeWhenReady(), 100);
           return;
         }
@@ -1757,11 +4324,21 @@ function myIndicator(data) {
 
         // Controls
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        // TradingView-style controls
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
-        this.controls.maxPolarAngle = Math.PI / 1.5; // Limit rotation
-        this.controls.minDistance = 5;
-        this.controls.maxDistance = 80;
+        this.controls.dampingFactor = 0.1; // Smoother damping
+        this.controls.maxPolarAngle = Math.PI / 1.8; // Allow more rotation
+        this.controls.minDistance = 2;   // Very close zoom
+        this.controls.maxDistance = 200; // Very far zoom
+        this.controls.panSpeed = 2.0;    // Responsive panning
+        this.controls.enablePan = true;  // Enable panning
+        this.controls.screenSpacePanning = true;
+        this.controls.zoomSpeed = 1.2;   // Smooth zoom
+        this.controls.mouseButtons = {
+          LEFT: THREE.MOUSE.PAN,      // Left-click to pan (TradingView style)
+          MIDDLE: THREE.MOUSE.DOLLY,  // Middle mouse to zoom
+          RIGHT: THREE.MOUSE.ROTATE   // Right-click to rotate
+        };
 
         // Groups
         this.candlesticks = new THREE.Group();
@@ -1819,21 +4396,150 @@ function myIndicator(data) {
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
 
+        // Add TradingView-style keyboard controls
+        this.setupKeyboardControls();
+
         // Mark the chart as ready
         this.isReady = true;
-        
+
         // Signal that the chart is prepared
         updateLoadingProgress('chart', true);
-        
+
         // Start animation
         this.animate();
+      }
+
+      // TradingView-style keyboard shortcuts
+      setupKeyboardControls() {
+        document.addEventListener('keydown', (e) => {
+          // Don't interfere with text inputs
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+          const barMove = 0.6;    // Move 1 bar at a time
+          const fastMove = 5;     // Fast pan
+          const zoomFactor = 0.9; // Zoom multiplier
+
+          switch(e.key) {
+            // ← / → : Move 1 bar left/right (TradingView default)
+            case 'ArrowLeft':
+              if (e.ctrlKey || e.metaKey) {
+                // Ctrl/Cmd + ← : Move many bars left
+                this.controls.target.x -= fastMove;
+                this.camera.position.x -= fastMove;
+              } else {
+                // ← : Move 1 bar left
+                this.controls.target.x -= barMove;
+                this.camera.position.x -= barMove;
+              }
+              e.preventDefault();
+              break;
+
+            case 'ArrowRight':
+              if (e.ctrlKey || e.metaKey) {
+                // Ctrl/Cmd + → : Move many bars right
+                this.controls.target.x += fastMove;
+                this.camera.position.x += fastMove;
+              } else {
+                // → : Move 1 bar right
+                this.controls.target.x += barMove;
+                this.camera.position.x += barMove;
+              }
+              e.preventDefault();
+              break;
+
+            // Ctrl/Alt + ↑/↓ : Zoom in/out (TradingView style)
+            case 'ArrowUp':
+              if (e.ctrlKey || e.metaKey || e.altKey) {
+                // Zoom in (move camera closer)
+                const distance = this.camera.position.distanceTo(this.controls.target);
+                const newDistance = Math.max(distance * zoomFactor, this.controls.minDistance);
+                const direction = new THREE.Vector3();
+                direction.subVectors(this.camera.position, this.controls.target).normalize();
+                this.camera.position.copy(this.controls.target).add(direction.multiplyScalar(newDistance));
+                e.preventDefault();
+              }
+              break;
+
+            case 'ArrowDown':
+              if (e.ctrlKey || e.metaKey || e.altKey) {
+                // Zoom out (move camera away)
+                const distance = this.camera.position.distanceTo(this.controls.target);
+                const newDistance = Math.min(distance / zoomFactor, this.controls.maxDistance);
+                const direction = new THREE.Vector3();
+                direction.subVectors(this.camera.position, this.controls.target).normalize();
+                this.camera.position.copy(this.controls.target).add(direction.multiplyScalar(newDistance));
+                e.preventDefault();
+              }
+              break;
+
+            // + / - : Zoom in/out
+            case '+':
+            case '=':
+              const distPlus = this.camera.position.distanceTo(this.controls.target);
+              const newDistPlus = Math.max(distPlus * zoomFactor, this.controls.minDistance);
+              const dirPlus = new THREE.Vector3();
+              dirPlus.subVectors(this.camera.position, this.controls.target).normalize();
+              this.camera.position.copy(this.controls.target).add(dirPlus.multiplyScalar(newDistPlus));
+              e.preventDefault();
+              break;
+
+            case '-':
+            case '_':
+              const distMinus = this.camera.position.distanceTo(this.controls.target);
+              const newDistMinus = Math.min(distMinus / zoomFactor, this.controls.maxDistance);
+              const dirMinus = new THREE.Vector3();
+              dirMinus.subVectors(this.camera.position, this.controls.target).normalize();
+              this.camera.position.copy(this.controls.target).add(dirMinus.multiplyScalar(newDistMinus));
+              e.preventDefault();
+              break;
+
+            // Home: Auto-fit (show all candles)
+            case 'Home':
+              this.resetView();
+              e.preventDefault();
+              break;
+
+            // End: Jump to latest candles (like TradingView's >> button)
+            case 'End':
+              this.jumpToLatest();
+              e.preventDefault();
+              break;
+          }
+
+          this.controls.update();
+        });
+      }
+
+      // Reset camera to show all candles
+      resetView() {
+        if (!this.data || this.data.length === 0) return;
+
+        const dataLength = this.data.length;
+        this.controls.target.set(0, 0, 0);
+        this.camera.position.set(dataLength * 0.3, 15, 40);
+        this.controls.update();
+      }
+
+      // Jump to latest candles
+      jumpToLatest() {
+        if (!this.data || this.data.length === 0) return;
+
+        const dataLength = this.data.length;
+        this.controls.target.x = dataLength * 0.6;
+        this.camera.position.x = dataLength * 0.6;
+        this.controls.update();
       }
       
       // Initialize post-processing effects (bloom + lens)
       setupPostprocessing() {
+        // Simplified - skip post-processing for now (missing dependencies)
+        this.composer = null;
+        return;
+
+        /* Disabled due to missing CDN libraries
         // Create composer
         this.composer = new THREE.EffectComposer(this.renderer);
-        
+
         // Add render pass
         const renderPass = new THREE.RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
@@ -1869,9 +4575,10 @@ function myIndicator(data) {
         });
         
         this.composer.addPass(this.lensPass);
-        
+
         // Make sure the final pass outputs to screen
         this.lensPass.renderToScreen = true;
+        */
       }
       
       // Initialize particle materials using custom shaders
@@ -2942,15 +5649,17 @@ function myIndicator(data) {
           <div class="skeleton skeleton-text"></div>
           <div class="skeleton skeleton-text-short"></div>
         `;
-        
+
         // Fetch predictions
         const { data: aiData, error: aiErr } = await getPrediction(currentSymbol, '7d');
-        
+
         if (aiErr) {
-          aiContent.textContent = `Error: ${aiErr}`;
+          aiContent.textContent = `Error: Disabled`;
+          // Mark AI as loaded even on error
+          updateLoadingProgress('ai', true);
           return;
         }
-        
+
         if (aiData) {
           aiContent.innerHTML = `
             <div>Target Price: $${aiData.target_price}</div>
@@ -2962,13 +5671,15 @@ function myIndicator(data) {
         } else {
           aiContent.textContent = 'No AI prediction found.';
         }
-        
+
         // Mark AI as loaded
         updateLoadingProgress('ai', true);
-        
+
       } catch (err) {
         console.error('Error loading AI predictions:', err);
         aiContent.textContent = 'Error loading predictions.';
+        // Mark AI as loaded even on error
+        updateLoadingProgress('ai', true);
       }
     }
 
@@ -3054,29 +5765,86 @@ function myIndicator(data) {
       if (chartLoading) {
         chartLoading.classList.remove('loaded');
       }
-      
+
       try {
+        // Load Attana CSV data if symbol is ATANA
+        if (currentSymbol === 'ATANA' || currentSymbol === 'ATTANA') {
+          const attanaData = await loadAttanaCSV();
+          if (attanaData && attanaData.length > 0) {
+            updateLoadingProgress('connect', true);
+            showToast('success', 'Attana Data Loaded', `Loaded ${attanaData.length} candlesticks`);
+            return attanaData;
+          }
+        }
+
         const rawData = await getMarketData(currentSymbol, currentTimeframe);
-        
+
         if (rawData.error) {
           showToast('error', 'Data Error', `Failed to load market data: ${rawData.error}`);
           return generateMockData();
         }
-        
+
         if (rawData && rawData.data && rawData.data.length > 0) {
           updateLoadingProgress('connect', true);
           return convertCandlestickData(rawData.data);
         }
-        
+
         // Fallback to mock data
         updateLoadingProgress('connect', true);
         return generateMockData();
-        
+
       } catch (err) {
         console.error('Error loading market data:', err);
         showToast('warning', 'Data Warning', 'Using mock data due to connection issue');
         updateLoadingProgress('connect', true);
         return generateMockData();
+      }
+    }
+
+    // Load Attana CSV data
+    async function loadAttanaCSV() {
+      try {
+        const response = await fetch('/attana_ohlc.csv');
+        const csvText = await response.text();
+        const lines = csvText.trim().split('\n');
+        const data = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].replace(/"/g, '');
+          const values = line.split(',');
+
+          if (values.length >= 5) {
+            let dateStr = values[0].trim().replace('/2025', '/2024');
+            const date = new Date(dateStr);
+            const timestamp = date.getTime();
+
+            const close = parseFloat(values[1].replace(',', '.'));
+            const open = parseFloat(values[2].replace(',', '.'));
+            const high = parseFloat(values[3].replace(',', '.'));
+            const low = parseFloat(values[4].replace(',', '.'));
+
+            let volume = 1000000;
+            if (values.length >= 6 && values[5].trim() !== '') {
+              const volStr = values[5].trim();
+              if (volStr.endsWith('M')) {
+                volume = parseFloat(volStr.replace('M', '').replace(',', '.')) * 1000000;
+              } else if (volStr.endsWith('K')) {
+                volume = parseFloat(volStr.replace('K', '').replace(',', '.')) * 1000;
+              } else {
+                volume = parseFloat(volStr.replace(',', '.')) || 1000000;
+              }
+            }
+
+            if (!isNaN(timestamp) && !isNaN(open) && !isNaN(high) && !isNaN(low) && !isNaN(close)) {
+              data.push({ timestamp, open, high, low, close, volume });
+            }
+          }
+        }
+
+        return data.sort((a, b) => a.timestamp - b.timestamp);
+      } catch (error) {
+        console.error('Error loading Attana CSV:', error);
+        return null;
       }
     }
 
@@ -3225,7 +5993,11 @@ function myIndicator(data) {
         if (preferences.panelsCollapsed) {
           rightPanels.classList.add('collapsed');
           panelsToggle.classList.add('collapsed');
-          panelsToggle.innerHTML = '<span>◀</span>';
+          document.querySelector('.platform-container')?.classList.add('right-panel-collapsed');
+          // Update tooltip only (don't replace SVG with innerHTML)
+          const tooltip = panelsToggle.querySelector('.tv-tooltip');
+          if (tooltip) tooltip.textContent = 'Show panel';
+          panelsToggle.setAttribute('aria-expanded', 'false');
         }
       }
     }
@@ -3778,7 +6550,7 @@ function myIndicator(data) {
         
         // In a real app, also implement applying the indicator to the chart
         console.log('Custom indicators:', window.customIndicators);
-        
+
         // Try to apply the indicator to the chart if it's active
         if (indicator.active && chart) {
           try {
@@ -3833,7 +6605,19 @@ function myIndicator(data) {
         
         // Initialize custom indicators
         initializeCustomIndicators();
-        
+
+        // Initialize context menu
+        initializeContextMenu();
+
+        // Initialize Sidebar Controller (Enterprise-grade panel management)
+        initializeSidebarController();
+
+        // Initialize tab switching for panels
+        initializePanelTabs();
+
+        // Initialize detach button handlers
+        initializeDetachButtons();
+
         // Check if user is logged in
         onAuthStateChange((event, session) => {
           updateUserInterface(!!session);
@@ -3862,7 +6646,7 @@ function myIndicator(data) {
       } catch (error) {
         console.error('Error initializing:', error);
         showToast('error', 'Initialization Error', error.message);
-        
+
         // Still mark progress as complete to hide the loading screen
         updateLoadingProgress('initialize', true);
         updateLoadingProgress('connect', true);
@@ -3870,6 +6654,598 @@ function myIndicator(data) {
         updateLoadingProgress('chart', true);
       }
     });
+
+    // TradingView-style Context Menu Handler
+    function initializeContextMenu() {
+      const contextMenu = document.getElementById('chart-context-menu');
+      const chartContainer = document.getElementById('chart-container');
+
+      // Show context menu on right-click
+      chartContainer.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        contextMenu.style.left = `${e.clientX}px`;
+        contextMenu.style.top = `${e.clientY}px`;
+        contextMenu.classList.add('active');
+      });
+
+      // Hide menu on outside click
+      document.addEventListener('click', (e) => {
+        if (!contextMenu.contains(e.target)) {
+          contextMenu.classList.remove('active');
+        }
+      });
+
+      // Handle menu clicks
+      contextMenu.addEventListener('click', (e) => {
+        const item = e.target.closest('.context-menu-item');
+        if (!item || item.classList.contains('submenu')) return;
+
+        const action = item.getAttribute('data-action');
+        if (action === 'auto-scale' && chart) chart.resetView();
+        if (action === 'invert-scale' && chart) chart.scene.rotation.z = chart.scene.rotation.z ? 0 : Math.PI;
+
+        contextMenu.classList.remove('active');
+      });
+    }
+
+    // Lightweight Charts 2D Implementation
+    let lightweightChart = null;
+    let candlestickSeries = null;
+    let volumeSeries = null;
+    let currentView = '3d'; // '3d' or '2d'
+
+    function initialize2DChart() {
+      const container = document.getElementById('chart-2d-container');
+
+      // Check if library is loaded
+      if (typeof LightweightCharts === 'undefined') {
+        showToast('error', 'Chart Error', 'Lightweight Charts library not loaded. Please refresh.');
+        console.error('LightweightCharts not loaded');
+        return;
+      }
+
+      // Create chart with TradingView styling
+      lightweightChart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        layout: {
+          background: { color: '#0f0f1a' },
+          textColor: '#d1d4dc',
+        },
+        grid: {
+          vertLines: { color: '#1a1a2e' },
+          horzLines: { color: '#1a1a2e' },
+        },
+        crosshair: {
+          mode: LightweightCharts.CrosshairMode.Normal,
+        },
+        rightPriceScale: {
+          borderColor: '#2a2e39',
+        },
+        timeScale: {
+          borderColor: '#2a2e39',
+          timeVisible: true,
+          secondsVisible: false,
+        },
+      });
+
+      // Add candlestick series (using v3 API)
+      candlestickSeries = lightweightChart.addCandlestickSeries({
+        upColor: '#00b894',
+        downColor: '#ff7675',
+        borderDownColor: '#ff7675',
+        borderUpColor: '#00b894',
+        wickDownColor: '#ff7675',
+        wickUpColor: '#00b894',
+      });
+
+      // Add volume series
+      volumeSeries = lightweightChart.addHistogramSeries({
+        color: '#26a69a',
+        priceFormat: {
+          type: 'volume',
+        },
+        priceScaleId: '',
+        scaleMargins: {
+          top: 0.8,
+          bottom: 0,
+        },
+      });
+
+      // Make chart responsive
+      new ResizeObserver(() => {
+        if (lightweightChart && currentView === '2d') {
+          lightweightChart.applyOptions({
+            width: container.clientWidth,
+            height: container.clientHeight
+          });
+        }
+      }).observe(container);
+    }
+
+    function load2DChartData(data) {
+      if (!data || data.length === 0) return;
+
+      // Convert data to Lightweight Charts format (needs YYYY-MM-DD format)
+      const candlestickData = data
+        .filter(d => {
+          // Strict validation - all values must be valid numbers
+          return d.timestamp &&
+                 typeof d.open === 'number' && !isNaN(d.open) && d.open > 0 &&
+                 typeof d.high === 'number' && !isNaN(d.high) && d.high > 0 &&
+                 typeof d.low === 'number' && !isNaN(d.low) && d.low > 0 &&
+                 typeof d.close === 'number' && !isNaN(d.close) && d.close > 0;
+        })
+        .map(d => {
+          const date = new Date(d.timestamp);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+
+          return {
+            time: `${year}-${month}-${day}`,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close,
+          };
+        });
+
+      const volumeData = data
+        .filter(d => {
+          // Validate volume exists and is a valid number
+          return d.timestamp &&
+                 d.volume &&
+                 typeof d.volume === 'number' &&
+                 !isNaN(d.volume) &&
+                 d.volume > 0 &&
+                 typeof d.close === 'number' &&
+                 typeof d.open === 'number';
+        })
+        .map(d => {
+          const date = new Date(d.timestamp);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+
+          return {
+            time: `${year}-${month}-${day}`,
+            value: d.volume,
+            color: d.close >= d.open ? '#00b89433' : '#ff767533'
+          };
+        });
+
+      // CRITICAL FIX: Sort and deduplicate (Lightweight Charts requires strict ascending order)
+      candlestickData.sort((a, b) => new Date(a.time) - new Date(b.time));
+      volumeData.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+      // Remove duplicates
+      const uniqueCandles = [];
+      const seenTimes = new Set();
+      candlestickData.forEach(candle => {
+        if (!seenTimes.has(candle.time)) {
+          uniqueCandles.push(candle);
+          seenTimes.add(candle.time);
+        }
+      });
+
+      const uniqueVolume = [];
+      const seenVolTimes = new Set();
+      volumeData.forEach(vol => {
+        if (!seenVolTimes.has(vol.time)) {
+          uniqueVolume.push(vol);
+          seenVolTimes.add(vol.time);
+        }
+      });
+
+      console.log(`Fixed: ${candlestickData.length} → ${uniqueCandles.length} candles`);
+      console.log('First:', uniqueCandles[0]);
+      console.log('Last:', uniqueCandles[uniqueCandles.length - 1]);
+
+      try {
+        candlestickSeries.setData(uniqueCandles);
+        volumeSeries.setData(uniqueVolume);
+        console.log('✓ Chart loaded successfully');
+
+        // Hide loading overlay
+        const chartLoading = document.getElementById('chart-loading');
+        if (chartLoading) {
+          chartLoading.classList.add('loaded');
+        }
+      } catch (e) {
+        console.error('Chart error:', e);
+        showToast('error', 'Chart Error', e.message);
+        return;
+      }
+
+      // Fit content to screen
+      lightweightChart.timeScale().fitContent();
+    }
+
+    function toggleChartView() {
+      const chart3D = document.getElementById('chart-container');
+      const chart2D = document.getElementById('chart-2d-container');
+      const toggleBtn = document.getElementById('view-toggle-btn');
+
+      if (currentView === '3d') {
+        // Switch to 2D
+        chart3D.style.display = 'none';
+        chart2D.style.display = 'block';
+        currentView = '2d';
+        toggleBtn.textContent = '2D View';
+        toggleBtn.classList.add('active');
+
+        // Initialize 2D chart if not done yet
+        if (!lightweightChart) {
+          initialize2DChart();
+          // Load current data
+          loadChartData().then(data => load2DChartData(data));
+        }
+
+        showToast('success', 'View Changed', 'Switched to professional 2D chart');
+      } else {
+        // Switch to 3D
+        chart3D.style.display = 'block';
+        chart2D.style.display = 'none';
+        currentView = '3d';
+        toggleBtn.textContent = '3D View';
+        toggleBtn.classList.remove('active');
+
+        showToast('success', 'View Changed', 'Switched to immersive 3D chart');
+      }
+    }
+
+    // Add toggle button handler after DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('view-toggle-btn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleChartView);
+      }
+    });
+
+    // ============================================
+    // ENTERPRISE SIDEBAR CONTROLLER INTEGRATION
+    // ============================================
+
+    /**
+     * Initialize the enterprise-grade Sidebar Controller
+     */
+    function initializeSidebarController() {
+      console.log('[Platform] Initializing Sidebar Controller...');
+
+      // Get the widgetbar buttons
+      const widgetbar = document.getElementById('widgetbar');
+      if (!widgetbar) {
+        console.warn('[Platform] Widgetbar not found');
+        return;
+      }
+
+      // Panel configuration
+      const panelConfig = {
+        watchlist: { id: 'watchlist-panel', button: '[data-panel="watchlist"]' },
+        alerts: { id: 'alerts-panel', button: '[data-panel="alerts"]' },
+        signals: { id: 'signals-panel', button: '[data-panel="signals"]' },
+        ai: { id: 'ai-combined-panel', button: '[data-panel="ai"]' },
+        screener: { id: 'screener-panel', button: '[data-panel="screener"]' },
+        pine: { id: 'pine-panel', button: '[data-panel="pine"]' },
+        calendar: { id: 'calendar-panel', button: '[data-panel="calendar"]' },
+        news: { id: 'news-panel', button: '[data-panel="news"]' },
+        notifications: { id: 'notifications-panel', button: '[data-panel="notifications"]' },
+        settings: { id: 'settings-panel', button: '[data-panel="settings"]' },
+        help: { id: 'help-panel', button: '[data-panel="help"]' }
+      };
+
+      let activePanel = 'signals'; // Default active panel
+
+      // Handle widgetbar button clicks
+      widgetbar.addEventListener('click', (e) => {
+        const button = e.target.closest('.tv-widgetbar-btn, [data-panel]');
+        if (!button) return;
+
+        const panelKey = button.dataset.panel;
+        if (!panelKey || !panelConfig[panelKey]) return;
+
+        // Toggle or switch panel
+        if (activePanel === panelKey) {
+          // Hide panel if already active
+          hidePanel(panelKey);
+          activePanel = null;
+          button.classList.remove('active', 'tv-widgetbar-btn--active');
+          button.setAttribute('aria-pressed', 'false');
+        } else {
+          // Hide current active panel
+          if (activePanel) {
+            hidePanel(activePanel);
+            const oldButton = widgetbar.querySelector(`[data-panel="${activePanel}"]`);
+            if (oldButton) {
+              oldButton.classList.remove('active', 'tv-widgetbar-btn--active');
+              oldButton.setAttribute('aria-pressed', 'false');
+            }
+          }
+
+          // Show new panel
+          showPanel(panelKey);
+          activePanel = panelKey;
+          button.classList.add('active', 'tv-widgetbar-btn--active');
+          button.setAttribute('aria-pressed', 'true');
+        }
+      });
+
+      // Show panel with animation
+      function showPanel(panelKey) {
+        const config = panelConfig[panelKey];
+        if (!config) return;
+
+        const panel = document.getElementById(config.id);
+        if (!panel) return;
+
+        // Hide all panels first
+        Object.values(panelConfig).forEach(cfg => {
+          const p = document.getElementById(cfg.id);
+          if (p && p !== panel) {
+            p.style.display = 'none';
+          }
+        });
+
+        // Show the selected panel with animation
+        panel.style.display = 'flex';
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateX(20px)';
+
+        requestAnimationFrame(() => {
+          panel.style.transition = 'opacity 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 250ms cubic-bezier(0.4, 0, 0.2, 1)';
+          panel.style.opacity = '1';
+          panel.style.transform = 'translateX(0)';
+        });
+
+        console.log(`[Sidebar] Showing panel: ${panelKey}`);
+      }
+
+      // Hide panel with animation
+      function hidePanel(panelKey) {
+        const config = panelConfig[panelKey];
+        if (!config) return;
+
+        const panel = document.getElementById(config.id);
+        if (!panel) return;
+
+        panel.style.transition = 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1)';
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateX(20px)';
+
+        setTimeout(() => {
+          panel.style.display = 'none';
+        }, 200);
+      }
+
+      // Show default panel (signals)
+      showPanel('signals');
+      const signalsBtn = widgetbar.querySelector('[data-panel="signals"]');
+      if (signalsBtn) {
+        signalsBtn.classList.add('active', 'tv-widgetbar-btn--active');
+        signalsBtn.setAttribute('aria-pressed', 'true');
+      }
+
+      console.log('[Platform] Sidebar Controller initialized');
+    }
+
+    /**
+     * Initialize tab switching for multi-tab panels
+     */
+    function initializePanelTabs() {
+      // AI Panel tabs
+      document.querySelectorAll('.ai-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          const panel = btn.closest('.panel');
+
+          // Update tab buttons
+          panel.querySelectorAll('.ai-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Update tab content
+          panel.querySelectorAll('.ai-tab-content').forEach(c => {
+            c.style.display = c.dataset.tab === tab ? 'block' : 'none';
+            c.classList.toggle('active', c.dataset.tab === tab);
+          });
+        });
+      });
+
+      // Screener tabs
+      document.querySelectorAll('.screener-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          const panel = btn.closest('.panel');
+
+          // Update tab buttons
+          panel.querySelectorAll('.screener-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Could load different screener content based on tab
+          console.log(`[Screener] Switched to ${tab} tab`);
+        });
+      });
+
+      // News tabs
+      document.querySelectorAll('.news-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          const panel = btn.closest('.panel');
+
+          // Update tab buttons
+          panel.querySelectorAll('.news-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Update tab content
+          panel.querySelectorAll('.news-tab-content').forEach(c => {
+            c.style.display = c.dataset.tab === tab ? 'block' : 'none';
+            c.classList.toggle('active', c.dataset.tab === tab);
+          });
+        });
+      });
+
+      console.log('[Platform] Panel tabs initialized');
+    }
+
+    /**
+     * Initialize detach button handlers
+     */
+    function initializeDetachButtons() {
+      document.querySelectorAll('.panel-detach-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const panelKey = btn.dataset.panel;
+          detachPanel(panelKey);
+        });
+      });
+
+      // Link indicator click handlers
+      document.querySelectorAll('.panel-link-indicator').forEach(indicator => {
+        indicator.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Toggle through link colors
+          const dot = indicator.querySelector('.panel-link-dot');
+          const colors = ['blue', 'green', 'orange', 'purple', 'master', 'none'];
+          const currentIndex = colors.findIndex(c => dot.classList.contains(c));
+          const nextIndex = (currentIndex + 1) % colors.length;
+
+          // Remove all color classes
+          colors.forEach(c => dot.classList.remove(c));
+          // Add new color
+          dot.classList.add(colors[nextIndex]);
+
+          console.log(`[Link] Changed to ${colors[nextIndex]} group`);
+          showToast('info', 'Link Color Changed', `Syncing with ${colors[nextIndex]} group`);
+        });
+      });
+
+      console.log('[Platform] Detach buttons initialized');
+    }
+
+    /**
+     * Detach a panel to a new window
+     */
+    function detachPanel(panelKey) {
+      const panelConfigs = {
+        watchlist: { title: 'Watchlist', width: 350, height: 600 },
+        alerts: { title: 'Alerts', width: 400, height: 500 },
+        signals: { title: 'AI Signals', width: 400, height: 600 },
+        ai: { title: 'AI Assistant', width: 450, height: 650 },
+        screener: { title: 'Screener', width: 500, height: 700 },
+        pine: { title: 'Pine Script Editor', width: 600, height: 700 },
+        calendar: { title: 'Economic Calendar', width: 450, height: 600 },
+        news: { title: 'News & Sentiment', width: 450, height: 600 },
+        notifications: { title: 'Notifications', width: 350, height: 500 }
+      };
+
+      const config = panelConfigs[panelKey];
+      if (!config) {
+        console.warn(`[Detach] Unknown panel: ${panelKey}`);
+        return;
+      }
+
+      // Get the panel content
+      const panel = document.querySelector(`[data-panel="${panelKey}"]#${panelKey}-panel`);
+      if (!panel) {
+        console.warn(`[Detach] Panel not found: ${panelKey}`);
+        return;
+      }
+
+      // Create new window
+      const features = `width=${config.width},height=${config.height},menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes`;
+      const detachedWindow = window.open('', `panel_${panelKey}_${Date.now()}`, features);
+
+      if (!detachedWindow) {
+        showToast('error', 'Popup Blocked', 'Please allow popups for detachable panels');
+        return;
+      }
+
+      // Write content to new window
+      detachedWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${config.title} - Moon AI Trading</title>
+          <link rel="stylesheet" href="src/styles/design-tokens.css">
+          <link rel="stylesheet" href="src/styles/tradingview-atomic.css">
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              background: var(--color-bg, #131722);
+              color: var(--color-text, rgba(255,255,255,0.9));
+              font-family: var(--font-family, -apple-system, sans-serif);
+            }
+            .detached-panel {
+              width: 100%;
+              height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+            .detached-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 12px 16px;
+              background: var(--color-surface, #1e222d);
+              border-bottom: 1px solid var(--color-border, rgba(255,255,255,0.06));
+            }
+            .detached-header h3 { margin: 0; font-size: 14px; }
+            .reattach-btn {
+              padding: 6px 12px;
+              background: var(--color-primary, #2962ff);
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 12px;
+            }
+            .detached-content {
+              flex: 1;
+              overflow-y: auto;
+              padding: 16px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="detached-panel">
+            <div class="detached-header">
+              <h3>${config.title}</h3>
+              <button class="reattach-btn" onclick="window.opener.reattachPanel('${panelKey}'); window.close();">
+                Reattach
+              </button>
+            </div>
+            <div class="detached-content">
+              ${panel.querySelector('.panel-content').innerHTML}
+            </div>
+          </div>
+          <script>
+            // Notify parent window
+            window.opener.postMessage({ type: 'panelDetached', panelKey: '${panelKey}' }, '*');
+          </script>
+        </body>
+        </html>
+      `);
+
+      // Hide the panel in main window
+      panel.style.display = 'none';
+
+      showToast('success', 'Panel Detached', `${config.title} opened in new window`);
+      console.log(`[Detach] Panel detached: ${panelKey}`);
+    }
+
+    /**
+     * Reattach a panel back to main window
+     */
+    window.reattachPanel = function(panelKey) {
+      const panel = document.querySelector(`[data-panel="${panelKey}"]#${panelKey}-panel`);
+      if (panel) {
+        panel.style.display = 'flex';
+        showToast('success', 'Panel Reattached', 'Panel returned to main window');
+        console.log(`[Reattach] Panel reattached: ${panelKey}`);
+      }
+    };
+
   </script>
 </body>
 </html>

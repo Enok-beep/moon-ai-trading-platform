@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Module Test</title>
+</head>
+<body>
+  <h1>Testing Module Imports</h1>
+  <pre id="output"></pre>
+
+  <script type="module">
+    const output = document.getElementById('output');
+    const log = (msg) => {
+      output.textContent += msg + '\n';
+      console.log(msg);
+    };
+
+    try {
+      log('1. Testing Logger import...');
+      const { logger } = await import('./src/core/Logger.js');
+      log('   ✓ Logger OK');
+
+      log('2. Testing SignalQueue import...');
+      const { signalQueue } = await import('./src/core/SignalQueue.js');
+      log('   ✓ SignalQueue OK');
+
+      log('3. Testing HealthMonitor import...');
+      const { healthMonitor } = await import('./src/core/HealthMonitor.js');
+      log('   ✓ HealthMonitor OK');
+
+      log('4. Testing ChartSyncService import...');
+      const { chartSync } = await import('./src/services/ChartSyncService.js');
+      log('   ✓ ChartSyncService OK');
+
+      log('5. Testing RiskService import...');
+      const { riskService } = await import('./src/services/RiskService.js');
+      log('   ✓ RiskService OK');
+
+      log('6. Testing Toast import...');
+      const { toast } = await import('./src/utils/Toast.js');
+      log('   ✓ Toast OK');
+
+      log('7. Testing ExecutionBarController import...');
+      const { executionBar } = await import('./src/controllers/ExecutionBarController.js');
+      log('   ✓ ExecutionBarController OK');
+
+      log('8. Testing PanelController import...');
+      const { panelController } = await import('./src/controllers/PanelController.js');
+      log('   ✓ PanelController OK');
+
+      log('9. Testing PortfolioController import...');
+      const { portfolioController } = await import('./src/controllers/PortfolioController.js');
+      log('   ✓ PortfolioController OK');
+
+      log('10. Testing SignalsController import...');
+      const { signalsController } = await import('./src/controllers/SignalsController.js');
+      log('   ✓ SignalsController OK');
+
+      log('11. Testing DataService import...');
+      const { DataService } = await import('./src/services/DataService.js');
+      log('   ✓ DataService OK');
+
+      log('12. Testing main.js import...');
+      const { app } = await import('./src/main.js');
+      log('   ✓ main.js OK');
+
+      log('\n=== ALL MODULES LOADED SUCCESSFULLY ===');
+
+    } catch (error) {
+      log('\n❌ ERROR: ' + error.message);
+      log('Stack: ' + error.stack);
+    }
+  </script>
+</body>
+</html>
