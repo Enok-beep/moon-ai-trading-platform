@@ -222,7 +222,10 @@ export class DataService {
     this.stats.disconnections++;
     this.stats.lastDisconnectedAt = Date.now();
 
-    logger.info('Live stream stopped successfully');
+    // Clear all callbacks to prevent old symbol callbacks from firing
+    this.onCandleCallbacks = [];
+
+    logger.info('Live stream stopped successfully', { callbacksCleared: true });
   }
 
   /**
